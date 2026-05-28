@@ -1,0 +1,11 @@
+   10 rem verb editor
+   20 dim v$(64)
+   30 n=1
+  100 scnclr
+  200 print,,"use +,- to navigate, f1:load, f3:save"
+  201 print
+  205 print"id","verb"
+  290 for i=nton+20
+  300 print i, v$(i)
+  305 next i
+  400 getkey a$
