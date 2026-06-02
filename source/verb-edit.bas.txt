@@ -1,11 +1,84 @@
    10 rem verb editor
-   20 dim v$(64)
+   11 mem1,3:scnclr
+   12 background 11:border 11:color 15
+   14 printchr$(14)
+   15 key off: rem this is needed to be able to read f1/f3 keys
+   20 dim v$(65):dim c(65)
    30 n=1
   100 scnclr
-  200 print,,"use +,- to navigate, f1:load, f3:save"
+  200 print,"{wht}use {lgrn}+{wht},{lgrn}-{wht} to navigate, {lgrn}Return{wht} to edit, {lgrn}f1{wht}:load, {lgrn}f3{wht}:save, {lgrn}Q{wht}uit"
   201 print
-  205 print"id","verb"
-  290 for i=nton+20
-  300 print i, v$(i)
-  305 next i
-  400 getkey a$
+  205 print"id","verb",,"used with an object? ({lgrn}y{wht}/{lgrn}n{wht}){lgrn}"
+  307 for i=0to79:c@&(i,3)=1 :nexti:color 1
+  310 cursor 9,3:print"[":cursor 23,3:print"]";:cursor 30
+  315 if c(n)=1 then print"y";:else print"n";
+  399 rem ----maain loop-----
+  400 gosub 700
+  405 getkey a$: v$=v$(n)
+  410 if a$="+" and n<64 and len(v$)>0 then n=n+1
+  420 if a$="-" and n>1 then n=n-1
+  430 if a$="q"         then n=n-1:goto 600
+  435 if a$=chr$(13) then gosub 800
+  440 if a$="y" then c(n)=1
+  445 if a$="n" then c(n)=0
+  450 if a$=chr$(133) then a$="":gosub 1100
+  455 if a$=chr$(134) then a$="":gosub 2100
+  500 goto 400
+  600 key on:scnclr : printchr$(142): end
+  699 rem ------print the list------
+  700 window 0,3,79,24:scnclr:window 0,0,79,24
+  701 cursoroff,0,3,0:color 14
+  702 for i=0to19
+  703 if n+i<65 then printn+i;"{left}. ",v$(n+i),,c(n+i):else print"                                                                             "
+  704 next i
+  720 return
+  799 -----rem type the value-----
+  800 v$(n)=""
+  801 cursor 9,3:print"[":cursor 23,3:print"]";:cursor 30
+  802 cursor on,10,3,0:printv$(n),,c(n);:cursoron,10,3,0
+  805 getkey a$
+  810 if asc(a$)=13 then 890:rem return
+  815 if asc(a$)>64 and asc(a$)<91 then v$(n)=v$(n)+a$
+  820 if asc(a$)>96 and asc(a$)<123 then v$(n)=v$(n)+a$
+  825 if asc(a$)>193 and asc(a$)<218 then v$(n)=v$(n)+a$
+  830 if asc(a$)<32 then a$=""
+  832 if asc(a$)=32 then v$(n)=v$(n)+a$
+  840 goto 802
+  890 cursor on,10,3,0:printv$(n),,c(n);
+  900 cursor off:return
+ 1000 for i=65to90 :printchr$(i);:nexti
+ 1001 for i=97to122:printchr$(i);:nexti
+ 1002 for i=190to220:printchr$(i);:nexti
+ 1099 rem --- load ---
+ 1100 border 13
+ 1110 as=($50000):ad=($50000)
+ 1115 bload"verbs",p($50000)
+ 1117 m=peek(as): rem cursor on,0,0,0:printm:getkey o$
+ 1120 for i=1tom
+ 1121 v$(i)=""
+ 1125   ad=ad+1
+ 1130   v$=chr$(peek(ad))
+ 1135   if v$="*" then 1150
+ 1140   v$(i)=v$(i)+v$
+ 1145 goto 1125
+ 1150 ad=ad+1:c(i)=peek(ad):ad=ad+1
+ 1180 next i
+ 1190 border 11:return
+ 2099 rem --- save ---
+ 2100 border 8
+ 2120 fori=1to64
+ 2122 v$=v$(i)
+ 2125 if len(v$)>0thenm=i:nexti:rem count verbs
+ 2130 ad=$50000: as=ad:poke as,m :ad=ad+1:rem start address and actual address
+ 2135 for i=1tom :rem ni is the nr of verbs
+ 2137 v$=v$(i)
+ 2140  for x=1tolen(v$(i))
+ 2145   poke ad,asc(mid$(v$,x,1)):ad=ad+1
+ 2147   rem cursor on,0,0,0:printhex$(ad):getkey o$
+ 2150  next x
+ 2155 poke ad,42: ad=ad+1:rem divider *
+ 2157 poke ad,c(i):ad=ad+1: poke ad,42:ad=ad+1
+ 2160 next i
+ 2165 print"copied to mem.";hex$(ad);
+ 2167 bsave"@verbs",p(as)to p(ad)
+ 2290 border 11:return

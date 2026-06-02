@@ -1,14 +1,13 @@
     0 :rem test normal char
    10 rem --- variables, arrays ---
    11 rem v: menu verb nr ---
-   12 nv=8 :rem number of verbs in the list
+   12 rem nv:number of verbs in the list
    15 background 0: border 0
    16 sp=$50000:rem screen pointer
    20 dim mi$(8):rem menu items
-   30 mi$(1)="Look": mi$(2)="Get":mi$(3)="Examine":mi$(4)="Drop":mi$(5)="Talk to":rem menu item definitions, to be loaded from disk in a later version
    50 dim r(32):dim g(32): dim b(32): rem palette values
    90 mem 1,3: screen clr
-   95 rem goto 120
+   95 gosub 8100
   100 rem gosub 7000 :rem load palette
   105 rem bload"fcmchrs.chr",p($40000)
   110 print chr$(14): rem lower case
@@ -27,16 +26,19 @@
   900 end
   999 rem ------menu------
  1000 v=1
+ 1001 edma 0,800,(sp+14*ls),$8000000
+ 1004 x1=1:y1=14:x2=10:y2=23:gosub 7100 :rem draw menu box
  1005 for m=1to7
  1010 my=14+m:mx=2:ml=8
  1011 if(v-4+m)<1 or (v-4+m)>nv then m$="":else m$=mi$(v-4+m)
- 1013 gosub 6000
+ 1013 gosub 6000: rem print menu items
  1014 nextm
  1020 getkey a$
- 1025 if a$="_" then 1490
+ 1025 if a$="_" then 1055
  1030 if a$=chr$(17) and v<nv then v=v+1
  1040 if a$=chr$(145) and v>1 then v=v-1
  1050 goto 1005
+ 1055 edma 0,800,$8000000,(sp+14*ls)
  1490 return
  4999 rem =========setup fcm screen mode===========
  5000 s1=wpeek($d062):s2=wpeek($d060): rem store screen pointer
@@ -78,3 +80,31 @@
  7060 loop
  7070 dclose#5
  7080 return
+ 7098 rem ----menu borders----
+ 7099 rem --x1,x2,y1,y2-------
+ 7100 le=x2-x1: rem length of menu box
+ 7105 he=y2-y1: rem height of menu box
+ 7110 for i=1tole-1
+ 7115  poke sp+x1*2+i*2+y1*ls,64
+ 7117  poke sp+x1*2+i*2+(y2-1)*ls,64
+ 7120 nexti
+ 7125 for i=1tohe-2
+ 7130  poke sp+x1*2+ls*(y1+i),93
+ 7135  poke sp+x2*2+ls*(y1+i),93
+ 7140 nexti
+ 7190 return
+ 8099 rem --- load ---
+ 8100 border 13
+ 8110 as=($50000):ad=($50000)
+ 8115 bload"verbs",p($50000)
+ 8117 nv=peek(as): rem cursor on,0,0,0:printm:getkey o$
+ 8120 for i=1tonv
+ 8121 mi$(i)=""
+ 8125   ad=ad+1
+ 8130   mi$=chr$(peek(ad))
+ 8135   if mi$="*" then 8150
+ 8140   mi$(i)=mi$(i)+mi$
+ 8145 goto 8125
+ 8150 ad=ad+1:c(i)=peek(ad):ad=ad+1
+ 8180 next i
+ 8190 border 11:return
