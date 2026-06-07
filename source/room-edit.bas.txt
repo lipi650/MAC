@@ -1,0 +1,65 @@
+   10 rem ---- room editor ----
+   12 rem room 0 is reserved for inventory
+   13 sa=wpeek($d060)+peek($d062)*65536: rem screen address
+   14 ts=$50000: rem temp storage 64k
+   18 key off
+   19 printchr$(14):rem lowercase
+   20 dim r(256):rem rooms and directions
+   21 dim n(256):rem room north
+   22 dim e(256):rem room east
+   23 dim s(256):rem room south
+   24 dim w(256):rem room west
+   26 dim u(256):rem room up
+   28 dim d(256):rem room down
+   30 dim de$(256):rem description
+   31 dim g(256): rem gfx number
+   32 c=1:b=0:rem c=current room, b=asc to byte connversion
+   34 x=0: y=12: rem cursor position for entering room description.
+   36 d$="": rem temporary string for description input
+   40 for i=1to255:poke ts+((i-1)*255),42:nexti:rem add an end* in each desc.
+ 1000 scnclr
+ 1001 print"{lgrn}q{wht}uit, {lgrn}+{wht}/{lgrn}-{wht}:room number,{lgrn}tab{wht}:navigate, {lgrn}n/e/s/w/u/d{wht}:related rooms, {lgrn}ret.{wht}: room desc."
+ 1002 cursor 2,1:print"{lgrn}g{wht}fx: ";g(c)
+ 1003 cursor 2,2:print"room : ";c
+ 1004 cursor 2,3:print"{lgrn}n{wht}orth: ";n(c)
+ 1005 cursor 2,4:print"{lgrn}e{wht}ast : ";e(c)
+ 1006 cursor 2,5:print"{lgrn}s{wht}outh: ";s(c)
+ 1007 cursor 2,6:print"{lgrn}w{wht}est : ";w(c)
+ 1008 cursor 2,7:print"{lgrn}u{wht}p   : ";u(c)
+ 1009 cursor 2,8:print"{lgrn}d{wht}own : ";d(c)
+ 1010 cursor 0,10:print"description:":gosub 5300
+ 1100 getkey a$
+ 1110 if a$="+" and c<255 then c=c+1
+ 1112 if a$="-" and c>1 then c=c-1
+ 1114 if a$="q" then 4000
+ 1116 if a$=chr$(13) then gosub 5000
+ 3900 goto 1000
+ 4000 key on:scnclr:end
+ 4999 rem ----input description----
+ 5000 x=0:y=12:d$="":n=0
+ 5010 for i=0to255:pokesa+960+i,32:nexti
+ 5020 poke sa+960+n,111:getkey a$
+ 5022 if asc(a$)=13 then poke sa+960+n,42: goto 5100:rem add a* at the end
+ 5023 if asc(a$)=20 and n>0 then poke sa+960+n-1,32:n=n-2:b=32:goto 5055
+ 5025 if asc(a$)>23 andasc(a$)<65 then b=asc(a$): rem numbers
+ 5028 if asc(a$)>64 andasc(a$)<95 then b=asc(a$)-64: rem lowercase letters
+ 5030 if asc(a$)>192 then b=asc(a$)-128:             rem capital letters
+ 5050 poke sa+960+n,b
+ 5055 if n<254 then n=n+1
+ 5070 goto 5020
+ 5100 for i=sa+960tosa+960+n
+ 5105 n=0
+ 5110  b=peek(sa+960+n)
+ 5115  poke ts+(c-1)*255+n,b
+ 5120  if b=42 then return
+ 5125 n=n+1:goto 5110
+ 5290 rem ----print room description----
+ 5300 n=0
+ 5310 b=peek(ts+(c-1)*255+n)
+ 5315  if b=42 then return
+ 5320  poke sa+960+n,b
+ 5325 n=n+1:goto 5310
+ 9000 for i=32to122:printchr$(i);:nexti:print
+ 9100 for i=193to218:printchr$(i);:nexti
+ 9200 getkey a$ :printasc(a$)
+ 9300 for i=0to255:poke 2048+960+i,i:nexti
