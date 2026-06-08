@@ -4,10 +4,20 @@
    12 rem nv:number of verbs in the list
    15 background 0: border 0
    16 sp=$50000:rem screen pointer
+   17 da=$40000: rem room descriptions $40000-$4ef10
    20 dim mi$(8):rem menu items
-   50 dim r(32):dim g(32): dim b(32): rem palette values
+   22 dim r(32):dim g(32): dim b(32): rem palette values
+   30 dim n(256):rem north
+   31 dim e(256):rem east
+   32 dim s(256):rem south
+   33 dim w(256):rem west
+   34 dim u(256):rem up
+   35 dim d(256):rem down
+   36 dim gr(256):rem gfx
+   37 dim dp(256):rem description pointer
    90 mem 1,3: screen clr
-   95 gosub 8100
+   95 gosub 8100 :rem load verbs
+   96 gosub 8200 :rem load rooms attributes
   100 rem gosub 7000 :rem load palette
   105 rem bload"fcmchrs.chr",p($40000)
   110 print chr$(14): rem lower case
@@ -93,7 +103,7 @@
  7135  poke sp+x2*2+ls*(y1+i),93
  7140 nexti
  7190 return
- 8099 rem --- load ---
+ 8099 rem --- load verbs ---
  8100 border 13
  8110 as=($50000):ad=($50000)
  8115 bload"verbs",p($50000)
@@ -108,3 +118,20 @@
  8150 ad=ad+1:c(i)=peek(ad):ad=ad+1
  8180 next i
  8190 border 11:return
+ 8199 rem --- load room attributes ---
+ 8200 bload "rooms-attr",p($40000)
+ 8205 for c=0to240
+ 8210  n(c)=peek($40000+c*9)
+ 8211  e(c)=peek($40001+c*9)
+ 8212  s(c)=peek($40002+c*9)
+ 8213  w(c)=peek($40003+c*9)
+ 8214  u(c)=peek($40004+c*9)
+ 8215  d(c)=peek($40005+c*9)
+ 8216  gr(c)=peek($40006+c*9)
+ 8217  dp(c)=wpeek($40007+c*9)
+ 8219 next c
+ 8220 rem --- load room descriptions ---
+ 8221 bload"rooms-desc",p(da)
+ 8222 for c=0to240
+ 8240 next c
+ 8290 return

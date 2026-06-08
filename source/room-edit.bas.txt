@@ -6,20 +6,20 @@
    14 ts=$50000: rem description storage 64k
    18 key off:border 12:background 11
    19 printchr$(14):rem lowercase
-   20 dim n(256):rem room north
-   21 dim dp(256): rem description location pointer
-   22 dim e(256):rem room east
-   23 dim s(256):rem room south
-   24 dim w(256):rem room west
-   26 dim u(256):rem room up
-   28 dim d(256):rem room down
-   30 dim de$(256):rem description
-   31 dim g(256): rem gfx number
+   20 dim n(241):rem room north
+   21 dim dp(241): rem description location pointer
+   22 dim e(241):rem room east
+   23 dim s(241):rem room south
+   24 dim w(241):rem room west
+   26 dim u(241):rem room up
+   28 dim d(241):rem room down
+   30 dim de$(241):rem description
+   31 dim g(241): rem gfx number
    32 c=1:b=0:rem c=current room, b=asc to byte connversion
    34 x=0: y=12: rem cursor position for entering room description.
    36 d$="": rem temporary string for description input
    38 v$="": rem temporary string for direction values
-   40 for i=1to255:poke ts+((i-1)*255),42:nexti:rem add an end* in each desc.
+   40 for i=1to240:poke ts+((i-1)*240),42:nexti:rem add an end* in each desc.
  1000 scnclr
  1001 print"{lgrn}q{wht}uit, {lgrn}+{wht}/{lgrn}-{wht}:room nr, {lgrn}n/e/s/w/u/d{wht}:related rooms, {lgrn}ret.{wht}: room desc.(0 is inventory)"
  1002 cursor 2,1:print"{lgrn}g{wht}fx: ";g(c)
@@ -30,10 +30,11 @@
  1007 cursor 2,6:print"{lgrn}w{wht}est : ";w(c)
  1008 cursor 2,7:print"{lgrn}u{wht}p   : ";u(c)
  1009 cursor 2,8:print"{lgrn}d{wht}own : ";d(c)
- 1010 cursor 0,10:print"description:"
- 1011 cursor 0,11:print"description pointer: ";dp(c):gosub 5300
+ 1010 cursor 2,9:print"{lgrn}f1{wht}:load, {lgrn}f2{wht}:save"
+ 1011 cursor 0,10:print"description:"
+ 1012 cursor 0,11:print"description pointer: ";dp(c):gosub 5300
  1100 getkey a$
- 1110 if a$="+" and c<255 then c=c+1
+ 1110 if a$="+" and c<240 then c=c+1
  1112 if a$="-" and c>0 then c=c-1
  1114 if a$="q" then 4000
  1116 if a$=chr$(13) then gosub 5000
@@ -63,39 +64,39 @@
  5100 for i=sa+960tosa+960+n
  5105 n=0
  5110  b=peek(sa+960+n)
- 5115  poke ts+c*255+n,b
+ 5115  poke ts+c*240+n,b
  5120  if b=42 then return
  5125 n=n+1:goto 5110
  5290 rem ----print room description----
  5300 n=0
- 5310 b=peek(ts+c*255+n)
+ 5310 b=peek(ts+c*240+n)
  5315  if b=42 then return
  5320  poke sa+960+n,b
  5325 n=n+1:goto 5310
  5399 rem ----input number for directions----
  5400 n=0: v$=""
  5405 input v$
- 5410 if val(v$)>255 then v$=""
+ 5410 if val(v$)>240 then v$=""
  5412 if val(v$)<0 then v$=""
  5415 v=val(v$):return
  5499 rem ----save to files----
  5500 border 8:sleep 0.2:c=0:i=0:n=0
  5505 do
- 5510  b=peek(ts+c*255+i):i=i+1
+ 5510  b=peek(ts+c*240+i):i=i+1
  5512  if b=42 then c=c+1:i=0:dp(c)=n+1
  5514  poke $40000+n,b:n=n+1
- 5518 loop while c<255
+ 5518 loop while c<240
  5519 bsave"@rooms-desc",p ($40000) to p($40000+n)
  5520 rem        ---save the attributes---
- 5525 for c=0to255
- 5530  poke $40000+c*8,n(c)
- 5531  poke $40001+c*8,e(c)
- 5532  poke $40002+c*8,s(c)
- 5533  poke $40003+c*8,w(c)
- 5534  poke $40004+c*8,u(c)
- 5535  poke $40005+c*8,d(c)
- 5536  poke $40006+c*8,g(c)
- 5537  wpoke $40007+c*8,dp(c)
+ 5525 for c=0to240
+ 5530  poke $40000+c*9,n(c)
+ 5531  poke $40001+c*9,e(c)
+ 5532  poke $40002+c*9,s(c)
+ 5533  poke $40003+c*9,w(c)
+ 5534  poke $40004+c*9,u(c)
+ 5535  poke $40005+c*9,d(c)
+ 5536  poke $40006+c*9,g(c)
+ 5537  wpoke $40007+c*9,dp(c)
  5539 next c
  5545 bsave"@rooms-attr",p ($40000) to p($40000+c*9)
  5790 c=0:n=0:border 12:return
@@ -105,22 +106,22 @@
  5810 c=0:n=0:i=0
  5820 do
  5830  b=peek($40000+n)
- 5840  poke ts+c*255+i,b
+ 5840  poke ts+c*240+i,b
  5845  n=n+1:i=i+1
  5850  if b=42 then c=c+1: i=0
- 5860 loop while c<255
+ 5860 loop while c<240
  5870 c=1
  5875 rem   ----load attributes----
  5880 bload"rooms-attr",p ($40000)
- 5885 for c=0to255
- 5890  n(c)= peek($40000+c*8)
- 5891  e(c)= peek($40001+c*8)
- 5892  s(c)= peek($40002+c*8)
- 5893  w(c)= peek($40003+c*8)
- 5894  u(c)= peek($40004+c*8)
- 5895  d(c)= peek($40005+c*8)
- 5896  g(c)= peek($40006+c*8)
- 5897  dp(c)= wpeek($40007+c*8)
+ 5885 for c=0to240
+ 5890  n(c)= peek($40000+c*9)
+ 5891  e(c)= peek($40001+c*9)
+ 5892  s(c)= peek($40002+c*9)
+ 5893  w(c)= peek($40003+c*9)
+ 5894  u(c)= peek($40004+c*9)
+ 5895  d(c)= peek($40005+c*9)
+ 5896  g(c)= peek($40006+c*9)
+ 5897  dp(c)= wpeek($40007+c*9)
  5898 next c
  5899 c=1
  5990 border 12:return
