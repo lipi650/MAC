@@ -1,14 +1,13 @@
-    1 rem to do: write the saving and loading subroutines
-    2 rem descriptions go in a separate file, the main file contains a pointer to them only
     3 rem a gfx viewer would be useful too
+    5 rem $40000-$4ffff is a temporary memory location used during save/load
    10 rem ---- room editor ----
    12 rem room 0 is reserved for inventory
    13 sa=wpeek($d060)+peek($d062)*65536: rem screen address
-   14 ts=$50000: rem temp storage 64k
+   14 ts=$50000: rem description storage 64k
    18 key off:border 12:background 11
    19 printchr$(14):rem lowercase
-   20 dim r(256):rem rooms and directions
-   21 dim n(256):rem room north
+   20 dim n(256):rem room north
+   21 dim dp(256): rem description location pointer
    22 dim e(256):rem room east
    23 dim s(256):rem room south
    24 dim w(256):rem room west
@@ -22,7 +21,7 @@
    38 v$="": rem temporary string for direction values
    40 for i=1to255:poke ts+((i-1)*255),42:nexti:rem add an end* in each desc.
  1000 scnclr
- 1001 print"{lgrn}q{wht}uit, {lgrn}+{wht}/{lgrn}-{wht}:room number,{lgrn}tab{wht}:navigate, {lgrn}n/e/s/w/u/d{wht}:related rooms, {lgrn}ret.{wht}: room desc."
+ 1001 print"{lgrn}q{wht}uit, {lgrn}+{wht}/{lgrn}-{wht}:room nr, {lgrn}n/e/s/w/u/d{wht}:related rooms, {lgrn}ret.{wht}: room desc.(0 is inventory)"
  1002 cursor 2,1:print"{lgrn}g{wht}fx: ";g(c)
  1003 cursor 2,2:print"room : ";c
  1004 cursor 2,3:print"{lgrn}n{wht}orth: ";n(c)
@@ -31,10 +30,11 @@
  1007 cursor 2,6:print"{lgrn}w{wht}est : ";w(c)
  1008 cursor 2,7:print"{lgrn}u{wht}p   : ";u(c)
  1009 cursor 2,8:print"{lgrn}d{wht}own : ";d(c)
- 1010 cursor 0,10:print"description:":gosub 5300
+ 1010 cursor 0,10:print"description:"
+ 1011 cursor 0,11:print"description pointer: ";dp(c):gosub 5300
  1100 getkey a$
  1110 if a$="+" and c<255 then c=c+1
- 1112 if a$="-" and c>1 then c=c-1
+ 1112 if a$="-" and c>0 then c=c-1
  1114 if a$="q" then 4000
  1116 if a$=chr$(13) then gosub 5000
  1118 if a$="n" then cursor13,3 :gosub 5400:n(c)=val(v$)
@@ -50,7 +50,7 @@
  4000 key on:scnclr:end
  4999 rem ----input description----
  5000 x=0:y=12:d$="":n=0
- 5010 for i=0to255:pokesa+960+i,32:nexti
+ 5010 for i=0to255:poke  sa+960+i,32:nexti
  5020 poke sa+960+n,111:getkey a$
  5022 if asc(a$)=13 then poke sa+960+n,42: goto 5100:rem add a* at the end
  5023 if asc(a$)=20 and n>0 then poke sa+960+n-1,32:n=n-2:b=32:goto 5055
@@ -63,12 +63,12 @@
  5100 for i=sa+960tosa+960+n
  5105 n=0
  5110  b=peek(sa+960+n)
- 5115  poke ts+(c-1)*255+n,b
+ 5115  poke ts+c*255+n,b
  5120  if b=42 then return
  5125 n=n+1:goto 5110
  5290 rem ----print room description----
  5300 n=0
- 5310 b=peek(ts+(c-1)*255+n)
+ 5310 b=peek(ts+c*255+n)
  5315  if b=42 then return
  5320  poke sa+960+n,b
  5325 n=n+1:goto 5310
@@ -79,11 +79,51 @@
  5412 if val(v$)<0 then v$=""
  5415 v=val(v$):return
  5499 rem ----save to files----
- 5500 border 8:sleep 0.2
- 5790 border 12:return
+ 5500 border 8:sleep 0.2:c=0:i=0:n=0
+ 5505 do
+ 5510  b=peek(ts+c*255+i):i=i+1
+ 5512  if b=42 then c=c+1:i=0:dp(c)=n+1
+ 5514  poke $40000+n,b:n=n+1
+ 5518 loop while c<255
+ 5519 bsave"@rooms-desc",p ($40000) to p($40000+n)
+ 5520 rem        ---save the attributes---
+ 5525 for c=0to255
+ 5530  poke $40000+c*8,n(c)
+ 5531  poke $40001+c*8,e(c)
+ 5532  poke $40002+c*8,s(c)
+ 5533  poke $40003+c*8,w(c)
+ 5534  poke $40004+c*8,u(c)
+ 5535  poke $40005+c*8,d(c)
+ 5536  poke $40006+c*8,g(c)
+ 5537  wpoke $40007+c*8,dp(c)
+ 5539 next c
+ 5545 bsave"@rooms-attr",p ($40000) to p($40000+c*9)
+ 5790 c=0:n=0:border 12:return
  5799 rem ----load from files----
  5800 border 5:sleep 0.2
+ 5805 bload"rooms-desc",p ($40000)
+ 5810 c=0:n=0:i=0
+ 5820 do
+ 5830  b=peek($40000+n)
+ 5840  poke ts+c*255+i,b
+ 5845  n=n+1:i=i+1
+ 5850  if b=42 then c=c+1: i=0
+ 5860 loop while c<255
+ 5870 c=1
+ 5875 rem   ----load attributes----
+ 5880 bload"rooms-attr",p ($40000)
+ 5885 for c=0to255
+ 5890  n(c)= peek($40000+c*8)
+ 5891  e(c)= peek($40001+c*8)
+ 5892  s(c)= peek($40002+c*8)
+ 5893  w(c)= peek($40003+c*8)
+ 5894  u(c)= peek($40004+c*8)
+ 5895  d(c)= peek($40005+c*8)
+ 5896  g(c)= peek($40006+c*8)
+ 5897  dp(c)= wpeek($40007+c*8)
+ 5898 next c
+ 5899 c=1
  5990 border 12:return
  8999 rem ----the below stuff can be removed later----
  9000 for i=32to122:printchr$(i);:nexti:print
- 9100 for i=193to218:printchr$(i);:nexti
+ 9100 for i=0to555:poke 3000+i,peek($40000+i):nexti
