@@ -1,0 +1,16 @@
+   10 rem --- mega adventure creator ---
+   90 scnclr
+   95 cursor 20,3
+  100 print "--- mega adventure creator ---"
+  110 cursor 25,5:print"1. verb-editor"
+  112 cursor 25,6:print"2. room-editor"
+  114 cursor 25,7:print"3. object-editor"
+  128 cursor 25,15:print"g. test the game"
+  130 cursor 25,16:print"q. quit"
+  300 getkey a$
+  310 if a$="1" then run"verb-edit.bas"
+  312 if a$="2" then run"room-edit.bas"
+  314 if a$="3" then run"obj-edit.bas"
+  318 if a$="g" then run"game.bas"
+  320 if a$="q" then end
+  400 goto 300

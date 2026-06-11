@@ -1,80 +1,65 @@
-    3 rem a gfx viewer would be useful too
-    5 rem $40000-$4ffff is a temporary memory location used during save/load
-   10 rem ---- room editor ----
+    5 rem $4xxxx-$4xxxx is a temporary memory location used during save/load
+   10 rem ---- object editor ----
    12 rem room 0 is reserved for inventory
    13 sa=wpeek($d060)+peek($d062)*65536: rem screen address
    14 ts=$50000: rem description storage 64k
    18 key off:border 12:background 11
    19 printchr$(14):rem lowercase
-   20 dim n(241):rem room north
-   21 dim dp(241): rem description location pointer
-   22 dim e(241):rem room east
-   23 dim s(241):rem room south
-   24 dim w(241):rem room west
-   26 dim u(241):rem room up
-   28 dim d(241):rem room down
-   30 dim de$(241):rem description
-   31 dim g(241): rem gfx number
-   32 c=1:b=0:rem c=current room, b=asc to byte connversion
+   20 dim ob(241):rem object name pointer
+   21 dim od(241): rem object description pointer
+   22 dim ob$(241): rem object name
+   24 dim ol(241):rem object location
+   25 le=0:rem length of the input string for description/object name
+   32 c=1:b=0:rem c=current room, b=asc to byte conversion
    34 x=0: y=12: rem cursor position for entering room description.
    36 d$="": rem temporary string for description input
    38 v$="": rem temporary string for direction values
-   40 for i=1to241:poke ts+((i-1)*240),94:nexti:rem add an end~ in each desc.
+   40 for i=1to240:poke ts+((i-1)*240),42:nexti:rem add an end* in each desc.
  1000 scnclr
- 1001 print"{lgrn}q{wht}uit, {lgrn}+{wht}/{lgrn}-{wht}:room nr, {lgrn}n/e/s/w/u/d{wht}:related rooms, {lgrn}ret.{wht}: room desc.(0 is inventory)"
- 1002 cursor 2,1:print"{lgrn}g{wht}fx: ";g(c)
- 1003 cursor 2,2:print"room : ";c
- 1004 cursor 2,3:print"{lgrn}n{wht}orth: ";n(c)
- 1005 cursor 2,4:print"{lgrn}e{wht}ast : ";e(c)
- 1006 cursor 2,5:print"{lgrn}s{wht}outh: ";s(c)
- 1007 cursor 2,6:print"{lgrn}w{wht}est : ";w(c)
- 1008 cursor 2,7:print"{lgrn}u{wht}p   : ";u(c)
- 1009 cursor 2,8:print"{lgrn}d{wht}own : ";d(c)
+ 1001 print"{lgrn}q{wht}uit, {lgrn}+{wht}/{lgrn}-{wht}:object nr, {lgrn}ret.{wht}: obj. desc. {lgrn}l{wht}ocation (0 is inventory)"
+ 1003 cursor 2,2:print"obj. nr. : ";c
+ 1004 cursor 2,3:print"{lgrn}o{wht}bject: ";ob$(c)
+ 1006 cursor 2,4:print"{lgrn}l{wht}ocation: ";ol(c)
  1010 cursor 2,9:print"{lgrn}f1{wht}:load, {lgrn}f3{wht}:save"
- 1011 cursor 0,10:print"description:"
- 1012 cursor 0,11:print"description pointer: ";dp(c):gosub 5300
+ 1011 cursor 0,10:print"description pointer: ";od(c):gosub 5300
+ 1012 cursor 0,11:print"description:"
  1100 getkey a$
- 1110 if a$="+" and c<240 then c=c+1
+ 1110 if a$="+" and c<239 then c=c+1
  1112 if a$="-" and c>0 then c=c-1
  1114 if a$="q" then 4000
- 1116 if a$=chr$(13) then gosub 5000
- 1118 if a$="n" then cursor13,3 :gosub 5400:n(c)=val(v$):s(val(v$))=c
- 1120 if a$="e" then cursor13,4 :gosub 5400:e(c)=val(v$):w(val(v$))=c
- 1121 if a$="s" then cursor13,5 :gosub 5400:s(c)=val(v$):n(val(v$))=c
- 1122 if a$="w" then cursor13,6 :gosub 5400:w(c)=val(v$):e(val(v$))=c
- 1124 if a$="u" then cursor13,7 :gosub 5400:u(c)=val(v$):d(val(v$))=c
- 1126 if a$="d" then cursor13,8 :gosub 5400:d(c)=val(v$):u(val(v$))=c
- 1128 if a$="g" then cursor13,1 :gosub 5400:g(c)=val(v$)
+ 1116 if a$=chr$(13) then gosub 5000 :rem return input desc.
+ 1120 if a$="l" then cursor13,4 :gosub 5400:ol(c)=val(v$)
+ 1122 if a$="o" then cursor13,6 : le=16:     rem input object name
  1130 if asc(a$)=133 then gosub 5800
  1132 if asc(a$)=134 then gosub 5500
  3900 goto 1000
- 4000 key on:printchr$(142):run"m.a.c."
+ 4000 key on:printchr$(142):end:rem run"m.a.c."
  4999 rem ----input description----
  5000 x=0:y=12:d$="":n=0
- 5010 for i=0to255:poke  sa+960+i,32:nexti
+ 5010 for i=0tole :poke  sa+960+i,32:nexti
  5020 poke sa+960+n,111:getkey a$
- 5022 if asc(a$)=13 then poke sa+960+n,94: goto 5100:rem add a~ at the end
+ 5022 if asc(a$)=13 then poke sa+960+n,42: goto 5100:rem add a* at the end
  5023 if asc(a$)=20 and n>0 then poke sa+960+n-1,32:n=n-2:b=32:goto 5055
  5025 if asc(a$)>23 andasc(a$)<65 then b=asc(a$): rem numbers
- 5028 if asc(a$)>64 andasc(a$)<94 then b=asc(a$)-64: rem lowercase letters
+ 5028 if asc(a$)>64 andasc(a$)<95 then b=asc(a$)-64: rem lowercase letters
  5030 if asc(a$)>192 then b=asc(a$)-128:             rem capital letters
  5032 if asc(a$)=141 then b=141        : rem line feed
  5050 poke sa+960+n,b
- 5055 if n<254 then n=n+1
+ 5055 if n<le-1 then n=n+1
  5070 goto 5020
  5100 for i=sa+960tosa+960+n
  5105 n=0
  5110  b=peek(sa+960+n)
  5115  poke ts+c*240+n,b
- 5120  if b=94 then return
+ 5120  if b=42 then return
  5125 n=n+1:goto 5110
- 5290 rem ----print room description----
+ 5290 rem ----print obj description----
  5300 n=0
  5310 b=peek(ts+c*240+n)
- 5315  if b=94 then return
+ 5315  if b=42 then return
  5320  poke sa+960+n,b
  5325 n=n+1:goto 5310
- 5399 rem ----input number for directions----
+ 5399 rem ----input number for location----
  5400 n=0: v$=""
  5405 input v$
  5410 if val(v$)>240 then v$=""
@@ -84,10 +69,10 @@
  5500 border 8:sleep 0.2:c=0:i=0:n=0
  5505 do
  5510  b=peek(ts+c*240+i):i=i+1
- 5512  if b=94 then c=c+1:i=0:dp(c)=n+1
+ 5512  if b=42 then c=c+1:i=0:dp(c)=n+1
  5514  poke $40000+n,b:n=n+1
  5518 loop while c<240
- 5519 bsave"@rooms-desc",p ($40000) to p($40000+n)
+ 5519 bsave"@obj-desc",p ($40000) to p($40000+n)
  5520 rem        ---save the attributes---
  5525 for c=0to240
  5530  poke $40000+c*9,n(c)
@@ -99,21 +84,21 @@
  5536  poke $40006+c*9,g(c)
  5537  wpoke $40007+c*9,dp(c)
  5539 next c
- 5545 bsave"@rooms-attr",p ($40000) to p($40000+c*9)
+ 5545 bsave"@obj-attr",p ($40000) to p($40000+c*9)
  5790 c=0:n=0:border 12:return
  5799 rem ----load from files----
  5800 border 5:sleep 0.2
- 5805 bload"rooms-desc",p ($40000)
+ 5805 bload"obj-desc",p ($40000)
  5810 c=0:n=0:i=0
  5820 do
  5830  b=peek($40000+n)
  5840  poke ts+c*240+i,b
  5845  n=n+1:i=i+1
- 5850  if b=94 then c=c+1: i=0
+ 5850  if b=42 then c=c+1: i=0
  5860 loop while c<240
  5870 c=1
  5875 rem   ----load attributes----
- 5880 bload"rooms-attr",p ($40000)
+ 5880 bload"obj-attr",p ($40000)
  5885 for c=0to240
  5890  n(c)= peek($40000+c*9)
  5891  e(c)= peek($40001+c*9)

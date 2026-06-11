@@ -24,7 +24,7 @@
   450 if a$=chr$(133) then a$="":gosub 1100
   455 if a$=chr$(134) then a$="":gosub 2100
   500 goto 400
-  600 key on:scnclr : printchr$(142): end
+  600 key on:scnclr : printchr$(142): run"m.a.c."
   699 rem ------print the list------
   700 window 0,3,79,24:scnclr:window 0,0,79,24
   701 cursoroff,0,3,0:color 14
@@ -58,7 +58,7 @@
  1121 v$(i)=""
  1125   ad=ad+1
  1130   v$=chr$(peek(ad))
- 1135   if v$="*" then 1150
+ 1135   ifasc(v$)=94 then 1150
  1140   v$(i)=v$(i)+v$
  1145 goto 1125
  1150 ad=ad+1:c(i)=peek(ad):ad=ad+1
@@ -76,8 +76,8 @@
  2145   poke ad,asc(mid$(v$,x,1)):ad=ad+1
  2147   rem cursor on,0,0,0:printhex$(ad):getkey o$
  2150  next x
- 2155 poke ad,42: ad=ad+1:rem divider *
- 2157 poke ad,c(i):ad=ad+1: poke ad,42:ad=ad+1
+ 2155 poke ad,94: ad=ad+1:rem divider ~
+ 2157 poke ad,c(i):ad=ad+1: poke ad,94:ad=ad+1
  2160 next i
  2165 print"copied to mem.";hex$(ad);
  2167 bsave"@verbs",p(as)to p(ad)
