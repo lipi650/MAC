@@ -2,9 +2,13 @@
    10 rem --- variables, arrays ---
    11 rem v: menu verb nr ---
    12 rem nv:number of verbs in the list
+   13 cr=1:pr=0: rem current room and previous room
+   14 ro=0: io=0: rem nr.of objs in current room/inventory
    15 background 0: border 0
    16 sp=$50000:rem screen pointer
-   17 da=$40000: rem room descriptions $40000-$4ef10
+   17 da=$40000: rem room descriptions $40000-$4ef0f
+   18 rem object names 120x16 bytes from $4ef10-$4f68f
+   19 rem object description 120x160 bytes from $4f690-$5418f
    20 dim mi$(8):rem menu items
    22 dim r(32):dim g(32): dim b(32): rem palette values
    30 dim n(256):rem north
@@ -15,22 +19,45 @@
    35 dim d(256):rem down
    36 dim gr(256):rem gfx
    37 dim dp(256):rem description pointer
+   40 dim ol(120) :rem object location
+   41 dim ob(120) :rem object name pointer
+   42 dim od(120) :rem object description pointer
+   43 dim o(120): rem objects in current room
+   44 dim l(120): rem objects in inventory
    90 mem 1,3: screen clr
+   94 gosub 8600 :rem load objects
    95 gosub 8100 :rem load verbs
    96 gosub 8200 :rem load rooms attributes
   100 rem gosub 7000 :rem load palette
-  105 rem bload"fcmchrs.chr",p($40000)
+  105 rem bload"fcmchrs.chr",p($4xxxx)
   110 print chr$(14): rem lower case
   113 gosub 6000 :rem print menu item
   115 gosub 5000: rem setup fcm-rrb environment
   199 rem ---- main loop ----
   200 vsync100: border 11
-  203 get a$
-  205 if a$="q" then 874
-  210 if a$=chr$(13) then gosub 1000: rem open menu
+  210 if cr<>pr then begin :rem if new room then print description.
+  211   gosub8500:rem scroll
+  212   ad=da+dp(cr):gosub 8300:rem room desc
+  213   gosub 8500:   rem ? "you can see:"
+  214   gosub 8700:rem make list of items in room.
+  215   if ro>0 then begin
+  216    for j=1toro
+  217     ad=da+$ef10+(o(j)):gosub 8300
+  218    nextj
+  219 bend
+  223 pr=cr
+  224 bend
+  303 getkey a$
+  305 if a$="q" then 874
+  307 if asc(a$)=145 and n(cr)<>0 then cr=n(cr)
+  308 if asc(a$)=29 and e(cr)<>0 then cr=e(cr)
+  309 if asc(a$)=17 and s(cr)<>0 then cr=s(cr)
+  310 if asc(a$)=157 and w(cr)<>0 then cr=w(cr)
+  311 if a$="u" and u(cr)<>0 then cr=u(cr)
+  312 if a$="d" and d(cr)<>0 then cr=d(cr)
+  313 if a$=chr$(13) then gosub 1000: rem open menu
   499 border 0
   500 goto 200
-  870 getkey a$
   874 gosub 5250: rem reset settings
   875 palette restore
   900 end
@@ -59,7 +86,7 @@
  5050 cc=wpeek($d05e)
  5060 poke $d05e, 40: rem set chrcnt
  5070 rem ==========================
- 5080 for i=0tols*25*2 step2 :wpoke$50000+i,$0021:nexti:rem fill the whole screen.
+ 5080 for i=0tols*25   step2 :wpoke$50000+i,$2020:nexti:rem fill the whole screen
  5090 for i=0tols*25*2 step2 :wpoke$ff80000+i,$0300:nexti:rem fill colour ram
  5225 return
  5230 getkey a$
@@ -112,7 +139,7 @@
  8121 mi$(i)=""
  8125   ad=ad+1
  8130   mi$=chr$(peek(ad))
- 8135   if mi$="*" then 8150
+ 8135   ifasc(mi$)=94 then 8150
  8140   mi$(i)=mi$(i)+mi$
  8145 goto 8125
  8150 ad=ad+1:c(i)=peek(ad):ad=ad+1
@@ -132,6 +159,46 @@
  8219 next c
  8220 rem --- load room descriptions ---
  8221 bload"rooms-desc",p(da)
- 8222 for c=0to240
- 8240 next c
  8290 return
+ 8299 rem --- print description/message ---
+ 8300 n=0:i=0
+ 8308 rem gosub 8500
+ 8309 do
+ 8310  b=peek(ad+n)
+ 8315  if b=94 then 8325
+ 8317 if b=141 then i=0:gosub 8500:goto 8322
+ 8320  poke sp+(24*40+i)*2,b
+ 8321 i=i+1
+ 8322 n=n+1
+ 8323 if i=41 then i=0:gosub 8500
+ 8325 loop while b<>94
+ 8327 gosub 8500
+ 8490 return
+ 8499 rem ---scroll 1 line up---
+ 8500 edma 0,1920,sp+80,sp
+ 8503 edma 3,80,32,sp+24*80
+ 8590 return
+ 8599 rem ----load objects----
+ 8600 c=0
+ 8605 bload"obj-attr",p ($40000)
+ 8610 for i=0to119
+ 8613  ob(i)= wpeek($40000+i*5)
+ 8614  od(i)= wpeek($40002+i*5)
+ 8615  ol(i)=  peek($40004+i*5)
+ 8617 nexti
+ 8625 bload"objects",p ($4ef10)
+ 8630 bload"obj-desc",p ($4f690)
+ 8640 return
+ 8690 rem ---count objects in current room---
+ 8700 ro=0
+ 8705 for i=1to119
+ 8706  ro=ro-(ol(i)=cr)
+ 8708 nexti
+ 8709 a=1
+ 8710 for i=1to119
+ 8712  if cr=ol(i) then o(a)=ob(i):a=a+1
+ 8714 next i
+ 8720 return
+ 8999 rem ========================
+ 9000 for i=0to255
+ 9010  poke 3000+i,peek($4ef10+i):nexti

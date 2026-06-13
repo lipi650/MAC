@@ -1,40 +1,34 @@
     5 rem $4xxxx-$4xxxx is a temporary memory location used during save/load
-   10 rem ---- object editor ----
+   10 rem ---- message editor ----
    12 rem room 0 is reserved for inventory
    13 sa=wpeek($d060)+peek($d062)*65536: rem screen address
-   14 ts=$50000: rem description storage from $50000-$54aff, object names $54b00
+   14 ts=$50000: rem messaage storage from $50000-$54aff, object names $54b00
    15 so=960:rem screen memory offset for input. 960 for desc. 251 for obj.name
    18 key off:border 12:background 11
    19 printchr$(14):rem lowercase
-   20 dim ob(121):rem object name pointer
-   21 dim od(121): rem object description pointer
-   24 dim ol(121):rem object name location
+   20 dim mp(241):rem messsge pointer
+   24 dim me(241):rem message
    25 le=0:rem length of the input string for description/object name
    32 c=1:b=0:rem c=current room, b=asc to byte conversion
    34 x=0: y=12: rem cursor position for entering room description.
    36 d$="": rem temporary string for description input
    38 v$="": rem temporary string for direction values
-   40 le=80: for i=1to120:poke ts+((i-1)*le),94:nexti:rem add an end~ in each desc.
-   42 le=16: ts=$54b00:for i=1to120:poke ts+((i-1)*le ),94:nexti:rem add an end~ in each desc.
+   40 le=80: for i=1to240:poke ts+((i-1)*le),94:nexti:rem add an end~ in each desc.
  1000 scnclr
- 1001 print"{lgrn}q{wht}uit, {lgrn}+{wht}/{lgrn}-{wht}:object nr, {lgrn}ret.{wht}: obj. desc. {lgrn}l{wht}ocation (0 is inventory)"
- 1003 cursor 2,2:print"obj. nr. : ";c
- 1004 cursor 2,3:print"{lgrn}o{wht}bject: ":gosub 5330
- 1006 cursor 2,4:print"{lgrn}l{wht}ocation: ";ol(c)
+ 1001 print"{lgrn}q{wht}uit, {lgrn}+{wht}/{lgrn}-{wht}:message nr, {lgrn}ret.{wht}: message."
+ 1003 cursor 2,2:print"Message nr. : ";c
  1010 cursor 2,9:print"{lgrn}f1{wht}:load, {lgrn}f3{wht}:save"
  1011 rem cursor 0,10:print"description pointer: ";od(c)
- 1012 cursor 0,11:print"description:":gosub 5300
+ 1012 cursor 0,11:print"Message:":gosub 5300
  1100 getkey a$
- 1110 if a$="+" and c<119 then c=c+1
+ 1110 if a$="+" and c<239 then c=c+1
  1112 if a$="-" and c>0 then c=c-1
  1114 if a$="q" then 4000
  1116 if a$=chr$(13) then ts=$50000: le=80: so=960: gosub 5000 :rem gosub input desc.
- 1120 if a$="l" then cursor13,4 :gosub 5400:ol(c)=val(v$)
- 1122 if a$="o" then ts=$54b00: le=16: so=251: gosub 5000 :rem input object name
  1130 if asc(a$)=133 then gosub 5800
  1132 if asc(a$)=134 then gosub 5500
  3900 goto 1000
- 4000 key on:printchr$(142): run"m.a.c."
+ 4000 key on:printchr$(142):run"m.a.c."
  4999 rem ----input description----
  5000 x=0:y=12:d$="":n=0
  5010 for i=0tole :poke  sa+so +i,32:nexti
@@ -54,77 +48,44 @@
  5115  poke ts+c*le+n,b
  5120  if b=94 then return
  5125 n=n+1:goto 5110
- 5290 rem ----print obj description----
+ 5290 rem ----print message----
  5300 le=80:n=0:ts=$50000:so=960
  5310 b=peek(ts+c*le+n)
  5315  if b=94 then return
  5320  poke sa+so +n,b
  5325 n=n+1:goto 5310
- 5327 rem ----print object name----
- 5330 le=16:n=0:ts=$54b00:so=251
- 5335 b=peek(ts+c*le+n)
- 5336  if b=94 then return
- 5340  poke sa+so +n,b
- 5345 n=n+1:goto 5335
- 5399 rem ----input number for location----
- 5400 n=0: v$=""
- 5405 input v$
- 5410 if val(v$)>239 then v$=""
- 5412 if val(v$)<0 then v$=""
- 5415 v=val(v$):return
  5499 rem ----save to files----
  5500 border 8:sleep 0.2:c=0:i=0:n=0:ts=$50000:le=80
  5505 do
  5510  b=peek(ts+c*le +i):i=i+1
- 5512  if b=94 then c=c+1:i=0:od(c)=n+1
+ 5512  if b=94 then c=c+1:i=0:me(c)=n+1
  5514  poke $40000+n,b:n=n+1
- 5518 loop while c<120
- 5519 bsave"@obj-desc",p ($40000) to p($40000+n)
+ 5518 loop while c<240
+ 5519 bsave"@messages",p ($40000) to p($40000+n)
  5520 rem -----------
- 5525 ts=$54b00:n=0:i=0:c=0:le=16
- 5530 do
- 5535  b=peek(ts+c*le +i):i=i+1
- 5540  if b=94 then c=c+1:i=0:ob(c)=n+1
- 5545  poke $40000+n,b:n=n+1
- 5550 loop while c<120
- 5555 bsave"@objects",p ($40000) to p($40000+n)
  5620 rem        ---save the attributes---
  5625 for c=0to119
- 5630  wpoke $40000+c*5,ob(c)
- 5631  wpoke $40002+c*5,od(c)
- 5632  poke $40004+c*5,ol(c)
+ 5630  wpoke $40000+c*2,mp(c)
  5639 next c
- 5645 bsave"@obj-attr",p ($40000) to p($40000+c*5)
+ 5645 bsave"@msgptr",p ($40000) to p($40000+c*5)
  5790 c=0:n=0:border 12:return
  5799 rem ----load from files----
  5800 border 5:sleep 0.2
- 5805 bload"obj-desc",p ($40000)
+ 5805 bload"messages",p ($40000)
  5810 c=0:n=0:i=0:ts=$50000:le=80
  5820 do
  5830  b=peek($40000+n)
  5840  poke ts+c*le +i,b
  5845  n=n+1:i=i+1
  5850  if b=94 then c=c+1: i=0
- 5860 loop while c<120
+ 5860 loop while c<240
  5870 c=0
  5875 rem   ----load attributes----
- 5880 bload"obj-attr",p ($40000)
- 5885 for c=0to119
- 5890  ob(c)= wpeek($40000+c*5)
- 5891  od(c)= wpeek($40002+c*5)
- 5892  ol(c)= peek($40004+c*5)
+ 5880 bload"msgptr",p ($40000)
+ 5885 for c=0to239
+ 5890  mp(c)= wpeek($40000+c*2)
  5898 next c
- 5899 c=0
- 5905 bload"objects",p ($40000)
- 5910 c=0:n=0:i=0:ts=$54b00:le=16
- 5920 do
- 5930  b=peek($40000+n)
- 5940  poke ts+c*le +i,b
- 5945  n=n+1:i=i+1
- 5950  if b=94 then c=c+1: i=0
- 5960 loop while c<120
- 5970 c=1
- 5990 border 12:return
+ 5990 c=0:border 12:return
  8999 rem ----the below stuff can be removed later----
  9000 for i=32to122:printchr$(i);:nexti:print
  9100 for i=0to555:poke 3000+i,peek($40000+i):nexti
