@@ -1,15 +1,17 @@
     0 :rem test normal char
+    9 rem screen buffers from $8000000-$8002280
    10 rem --- variables, arrays ---
    11 rem v: menu verb nr ---
    12 rem nv:number of verbs in the list
-   13 cr=1:pr=0: rem current room and previous room
+   13 cr=1:pr=0: g=1: rem current room and previous room / gfx on or off
    14 ro=0: io=0: rem nr.of objs in current room/inventory
-   15 background 0: border 0
+   15 background 0: border 0: pa=$8100000: rem pictures address
    16 sp=$50000:rem screen pointer
-   17 da=$40000: rem room descriptions $40000-$4ef0f
-   18 rem object names 120x16 bytes from $4ef10-$4f68f
-   19 rem object description 120x160 bytes from $4f690-$5418f
-   20 dim mi$(8):rem menu items
+   17 da=$8020000: rem room descriptions $8020000-$806ef0f(240*255)
+   18 rem object names 120x11 bytes from $805ef10-
+   19 rem object description 120x160 bytes from $805f690-$806418f
+   20 rem $40000-$400ff the area where the current description prints from
+   21 dim mi$(20):rem menu items
    22 dim r(32):dim g(32): dim b(32): rem palette values
    30 dim n(256):rem north
    31 dim e(256):rem east
@@ -28,11 +30,15 @@
    94 gosub 8600 :rem load objects
    95 gosub 8100 :rem load verbs
    96 gosub 8200 :rem load rooms attributes
+   97 bload"pictures.ncm",p(pa)
   100 rem gosub 7000 :rem load palette
   105 rem bload"fcmchrs.chr",p($4xxxx)
   110 print chr$(14): rem lower case
   113 gosub 6000 :rem print menu item
   115 gosub 5000: rem setup fcm-rrb environment
+  120 gosub 4820:rem upper half to buffer
+  122 gosub 4860: gosub 4840: rem set gfx screen and put it to buffer
+  124 gosub 4830: rem set upper half back to txt
   199 rem ---- main loop ----
   200 vsync100: border 11
   210 if cr<>pr then begin :rem if new room then print description.
@@ -47,8 +53,21 @@
   219 bend
   223 pr=cr
   224 bend
+  240 rem gosub global rules
+  260 rem gosub local rules
+  290 if g=1 and gr(cr)>0 then begin
+  292  gosub 4820
+  293  edma 0,16640,pa+(gr(cr)-1)*(48+16640)+48,$41000
+  294  gosub 4850
+  295  edma 0,48,pa+(gr(cr)-1)*(48+16640),$40000
+  296    for i=0to15
+  297     r(i)=peek($40000+i*3):g(i)=peek($40001+i*3):b(i)=peek($40002+i*3)
+  298     palette color i,r(i),g(i),b(i)
+  299    nexti
+  300 bend
   303 getkey a$
   305 if a$="q" then 874
+  306 gosub 4830:rem gfx off
   307 if asc(a$)=145 and n(cr)<>0 then cr=n(cr)
   308 if asc(a$)=29 and e(cr)<>0 then cr=e(cr)
   309 if asc(a$)=17 and s(cr)<>0 then cr=s(cr)
@@ -63,10 +82,10 @@
   900 end
   999 rem ------menu------
  1000 v=1
- 1001 edma 0,800,(sp+14*ls),$8000000
- 1004 x1=1:y1=14:x2=10:y2=23:gosub 7100 :rem draw menu box
+ 1001 gosub 4800
+ 1004 x1=1:y1=14:x2=12:y2=23:gosub 7100 :rem draw menu box
  1005 for m=1to7
- 1010 my=14+m:mx=2:ml=8
+ 1010 my=14+m:mx=2:ml=10
  1011 if(v-4+m)<1 or (v-4+m)>nv then m$="":else m$=mi$(v-4+m)
  1013 gosub 6000: rem print menu items
  1014 nextm
@@ -75,8 +94,41 @@
  1030 if a$=chr$(17) and v<nv then v=v+1
  1040 if a$=chr$(145) and v>1 then v=v-1
  1050 goto 1005
- 1055 edma 0,800,$8000000,(sp+14*ls)
+ 1055 gosub 4810
  1490 return
+ 4799 rem ---lower half to buffer---
+ 4800 edma 0,800,(sp+14*ls),$8000000
+ 4801 edma 0,800,($ff80000+14*ls),$8000320
+ 4802 return
+ 4809 rem ---buffer to lower half---
+ 4810 edma 0,800,$8000000,(sp+14*ls)
+ 4811 edma 0,800,$8000320,($ff80000+14*ls)
+ 4812 return
+ 4819 rem ---upper half to buffer---
+ 4820 edma 0,1040,sp,$8000640
+ 4821 edma 0,1040,$ff80000,$8001050
+ 4822 return
+ 4829 rem ---buffer to upper half---
+ 4830 edma 0,1040,$8000640,sp
+ 4831 edma 0,1040,$8001050,$ff80000
+ 4832 return
+ 4839 rem ---gfx to buffer---
+ 4840 edma 0,1040,sp,$8001460
+ 4841 edma 0,1040,$ff80000,$8001870
+ 4842 return
+ 4849 rem ---buffer to gfx---
+ 4850 edma 0,1040,$8001460,sp
+ 4851 edma 0,1040,$8001870,$ff80000
+ 4852 return
+ 4859 rem ---set gfx screen---
+ 4860 n=0
+ 4861 for s=0to12
+ 4862 for i=0to19:wpoke $ff80000+i*2+s*ls,$0008
+ 4863 wpoke$50000+i*2+s*ls,4160+n
+ 4864 n=n+1
+ 4866 next i
+ 4868 next s
+ 4869 return
  4999 rem =========setup fcm screen mode===========
  5000 s1=wpeek($d062):s2=wpeek($d060): rem store screen pointer
  5010 rem ==== enable seam mode ====
@@ -96,8 +148,6 @@
  5270 printchr$(27)+"8": poke$d058,80 :rem 80 column mode , setbit $d031,7
  5275 printchr$(142):rem uppercase
  5280 return
- 5910 if pl=0 then j=joy(2)
- 5990 return
  5999 rem -----print menu item-----
  6000 for i=1toml
  6002 if i>len(m$) then c=32:else c=asc(mid$(m$,i,1))-64
@@ -162,6 +212,7 @@
  8290 return
  8299 rem --- print description/message ---
  8300 n=0:i=0
+ 8305 edma 0,255,da,$40000
  8308 rem gosub 8500
  8309 do
  8310  b=peek(ad+n)
@@ -186,8 +237,8 @@
  8614  od(i)= wpeek($40002+i*5)
  8615  ol(i)=  peek($40004+i*5)
  8617 nexti
- 8625 bload"objects",p ($4ef10)
- 8630 bload"obj-desc",p ($4f690)
+ 8625 bload"objects",p (da+$ef10)
+ 8630 bload"obj-desc",p (da+$f690)
  8640 return
  8690 rem ---count objects in current room---
  8700 ro=0

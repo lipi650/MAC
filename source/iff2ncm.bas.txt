@@ -1,0 +1,94 @@
+    0 :rem test normal char
+   10 rem --- variables, arrays ---
+   15 background 0: border 0
+   50 dim r(32):dim g(32): dim b(32): rem palette values
+   90 mem 1,3: screen clr
+   91 nr=1
+   92 gosub 1000
+   95 rem goto 120
+  100 rem gosub 7000 :rem load palette
+  105 rem bload"fcmchrs.chr",p($40000)
+  115 gosub 5000: rem setup fcm-rrb environment
+  199 rem ---- main loop ----
+  200 vsync100: border 7
+  203 get a$
+  205 if a$="q" then 873
+  499 border 0
+  500 goto 200
+  870 getkey a$
+  873 bsave"@pictures.ncm",p($8000000) to p($8000000+nr*(48+16640))
+  874 gosub 5250: rem reset settings
+  875 palette restore
+  900 end
+  999 rem --- load iff image ---
+ 1000 screen 0,320,200,4
+ 1010 loadiff"lichlord.iff"
+ 1020 for i=0to15
+ 1025 r(i)=rpalette(0,i,0)
+ 1026 g(i)=rpalette(0,i,1)
+ 1027 b(i)=rpalette(0,i,2)
+ 1029 nexti
+ 1100 n=0
+ 1185 for tr=0to12
+ 1190 for tc=0to19
+ 1195 for r=0to7
+ 1200 for p=0to14 step 2
+ 1201 border 0
+ 1210 x=tc*16+p
+ 1215 y=tr*8+r+1 :rem start from the second row, the first will hold the palette
+ 1216 l=pixel(x,y):h=pixel(x+1,y)*16 :c=l+h
+ 1220 edma 3,1,c,$8000000+(nr-1)*(48+16640)+48+n
+ 1221 n=n+1:border 8
+ 1300 next p
+ 1305 next r
+ 1310 next tc
+ 1315 next tr
+ 1320 for i=0to15
+ 1325 edma 3,1,r(i),  $8000000+(nr-1)*(48+16640)+i*3
+ 1326 edma 3,1,g(i),  $8000001+(nr-1)*(48+16640)+i*3
+ 1327 edma 3,1,b(i),  $8000002+(nr-1)*(48+16640)+i*3
+ 1330 next i
+ 1850 rem getkey a$
+ 1900 screen close 0
+ 4999 rem =========setup fcm screen mode===========
+ 5000 s1=wpeek($d062):s2=wpeek($d060): rem store screen pointer
+ 5010 rem ==== enable seam mode ====
+ 5020 setbit $d054,2: setbit $d054,0 :rem fclrhi, chr16
+ 5030 printchr$(27)+"4": ls=80 : poke$d058,ls:  rem clearbit $d031,7 set 40 column mode,linestep
+ 5040 wpoke $d060,$0000: wpoke $d062,$5:rem set screen pointer to $50000
+ 5050 cc=wpeek($d05e)
+ 5060 poke $d05e, 40: rem set chrcnt
+ 5070 rem ==========================
+ 5080 for i=0tols*25*2 step2 :wpoke$50000+i,$0021:nexti:rem fill the whole screen
+ 5090 for i=0tols*25*2 step2 :wpoke$ff80000+i,$0300:nexti:rem fill colour ram
+ 5095 rem ---ncm---
+ 5100 n=0
+ 5101 for s=0to12
+ 5102 for i=0to19:wpoke $ff80000+i*2+s*ls,$0008: rem set ncm chars in row
+ 5103 wpoke$50000+i*2+s*ls,4096+n:      rem put character data to $40000-...
+ 5104 n=n+1                      :      rem put character data to $40000-...
+ 5108 next i
+ 5109 next s
+ 5120 edma 0,16640,$8000000+(nr-1)*(48+16640)+48,$40000
+ 5200 for i=0to15
+ 5205 palette color i,r(i),g(i),b(i)
+ 5220 next i
+ 5225 return
+ 5230 getkey a$
+ 5240 rem ===== reset settings =====
+ 5250 wpoke $d060,$800: wpoke$d062,$0000
+ 5260 clrbit $d054,2: clrbit $d054,0 :rem fclrhi, chr16
+ 5270 printchr$(27)+"8": poke$d058,80 :rem 80 column mode , setbit $d031,7
+ 5280 return
+ 5910 if pl=0 then j=joy(2)
+ 5990 return
+ 6999 rem === load palette
+ 7000 dopen#5,"palette32.pal"
+ 7010 i=0
+ 7020 do while i<32
+ 7030 get#5,r$,g$,b$
+ 7040 palette color i,asc(r$),asc(g$),asc(b$)
+ 7050 i=i+1
+ 7060 loop
+ 7070 dclose#5
+ 7080 return
