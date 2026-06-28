@@ -3,7 +3,7 @@
    10 rem --- variables, arrays ---
    11 rem v: menu verb nr ---
    12 rem nv:number of verbs in the list
-   13 cr=1:pr=0: g=1: rem current room and previous room / gfx on or off
+   13 cr=1:pr=0: g=1::rem current room and previous room / gfx on or off
    14 ro=0: io=0: rem nr.of objs in current room/inventory
    15 background 0: border 0: pa=$8100000: rem pictures address
    16 sp=$50000:rem screen pointer
@@ -59,7 +59,6 @@
   240 rem gosub global rules
   260 rem gosub local rules
   290 if g=1 and gr(cr)>0 then begin
-  291 gosub 4820: rem save current text to buffer
   292 edma 0,16640,pa+(gr(cr)-1)*(48+16640)+48,$41000
   293 gosub 4850: rem restore gfx to screen
   294 edma 0,48,pa+(gr(cr)-1)*(48+16640),$40000
@@ -105,7 +104,6 @@
  1040 if a$=chr$(145) and v>1 then v=v-1
  1050 goto 1005
  1055 gosub 4810: rem restore lower half
- 1056 if g=1 and gr(cr)>0 then gosub 4820: gosub 4850: rem restore gfx if it was showing
  1057 return
  1480 rem --- command selected path ---
  1485 if g=1 and gr(cr)>0 then gosub 4830: rem restore text before command evaluation
@@ -240,8 +238,10 @@
  8327 gosub 8500
  8490 return
  8499 rem ---scroll 1 line up---
- 8500 edma 0,1840,sp+160,sp+80
+ 8500 rem if g=1 and gr(cr)>0 then gosub 4830
+ 8501 edma 0,1840,sp+160,sp+80
  8503 edma 3,80,32,sp+24*80
+ 8504 if g=1 and gr(cr)>0 then gosub 4820
  8590 return
  8599 rem ----load objects----
  8600 c=0
