@@ -4,7 +4,7 @@ You can create a menu-driven text adventure with it and add colour graphics too.
 It will either use FCM (Fullcolor Character Mode) or NCM (Nibble colour mode).
 The program is still under development.
 
-##Importing the GFX:
+## Importing the GFX:
 Create a 320x200 IFF image.
 The first row should hold the palette (1 pixel of each color from left to right)
 The next 104 rows will be converted to 16x8 pixel sized NCM (Nibble Colour Mode) characters.
