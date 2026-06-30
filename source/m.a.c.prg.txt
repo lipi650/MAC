@@ -6,6 +6,8 @@
   112 cursor 25,6:print"2. room-editor"
   114 cursor 25,7:print"3. object-editor"
   116 cursor 25,8:print"4. message-editor"
+  118 cursor 25,9:print"5. global rules"
+  120 cursor 25,10:print"6. local rules"
   128 cursor 25,15:print"g. test the game"
   130 cursor 25,16:print"q. quit"
   300 getkey a$

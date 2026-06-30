@@ -1,3 +1,4 @@
+    1 mem 1,3:scnclr
     5 rem $4xxxx-$4xxxx is a temporary memory location used during save/load
    10 rem ---- message editor ----
    12 rem room 0 is reserved for inventory
@@ -58,7 +59,7 @@
  5500 border 8:sleep 0.2:c=0:i=0:n=0:ts=$50000:le=80
  5505 do
  5510  b=peek(ts+c*le +i):i=i+1
- 5512  if b=94 then c=c+1:i=0:me(c)=n+1
+ 5512  if b=94 then c=c+1:i=0:me(c)=n+1:mp(c)=n+1
  5514  poke $40000+n,b:n=n+1
  5518 loop while c<240
  5519 bsave"@messages",p ($40000) to p($40000+n)
@@ -67,7 +68,7 @@
  5625 for c=0to119
  5630  wpoke $40000+c*2,mp(c)
  5639 next c
- 5645 bsave"@msgptr",p ($40000) to p($40000+c*5)
+ 5645 bsave"@msgptr",p ($40000) to p($40000+c*2)
  5790 c=0:n=0:border 12:return
  5799 rem ----load from files----
  5800 border 5:sleep 0.2
