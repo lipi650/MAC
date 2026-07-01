@@ -1,7 +1,7 @@
 # M.A.C.
 Mega Adventure Creator is a Graphical Text Adventure creator for the Mega65.
 You can create a menu-driven text adventure with it and add colour graphics too.
-It will either use FCM (Fullcolor Character Mode) or NCM (Nibble colour mode).
+It will use NCM (Nibble colour mode) to keep the size small but I might release an FCM (Fullcolor Character Mode) version later if there's demand for it.
 The program is still under development.
 
 ## Importing the GFX:
