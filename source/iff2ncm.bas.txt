@@ -3,26 +3,29 @@
    15 background 0: border 0
    50 dim r(32):dim g(32): dim b(32): rem palette values
    90 mem 1,3: screen clr
-   91 nr=1
-   92 gosub 1000
-   95 rem goto 120
-  100 rem gosub 7000 :rem load palette
-  105 rem bload"fcmchrs.chr",p($40000)
-  115 gosub 5000: rem setup fcm-rrb environment
+   91 nr=1:dn=1
+  115 rem   gosub 5000: rem setup fcm-rrb environment
   199 rem ---- main loop ----
-  200 vsync100: border 7
-  203 get a$
-  205 if a$="q" then 873
+  200 print"mounting gfx source disk with iff files (file naming 01.iff...24.iff)"
+  201 dn$=right$(str$(100+dn),2)+"pics.d81"
+  202 print"from disk:",dn$:mount(dn$)
+  209 gosub 5000
+  210 f$=(right$(str$(100+nr),2))+".iff"
+  212 open 2,8,2,f$:dk=ds:close 2
+  213 if dk>0 or nr>24 then nr=nr-1:goto 872
+  214 gosub 1000
+  215 nr=nr+1
   499 border 0
-  500 goto 200
+  500 goto 210
   870 getkey a$
-  873 bsave"@pictures.ncm",p($8000000) to p($8000000+nr*(48+16640))
-  874 gosub 5250: rem reset settings
+  872 gosub 5250: rem reset settings
+  873 print"saving pictures to disk mac.d81": mount"mac.d81"
+  874 bsave"@pictures.ncm",p($8000000) to p($8000000+nr*(48+16640))
   875 palette restore
   900 end
   999 rem --- load iff image ---
  1000 screen 0,320,200,4
- 1010 loadiff"lichlord.iff"
+ 1010 loadiff(f$)
  1020 for i=0to15
  1025 r(i)=rpalette(0,i,0)
  1026 g(i)=rpalette(0,i,1)
@@ -80,8 +83,6 @@
  5260 clrbit $d054,2: clrbit $d054,0 :rem fclrhi, chr16
  5270 printchr$(27)+"8": poke$d058,80 :rem 80 column mode , setbit $d031,7
  5280 return
- 5910 if pl=0 then j=joy(2)
- 5990 return
  6999 rem === load palette
  7000 dopen#5,"palette32.pal"
  7010 i=0
