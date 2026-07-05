@@ -13,7 +13,8 @@
    20 rem messages 240x80 bytes from da+$13f40-da+$18a40
    21 rem $40000-$400ff the area where the current description prints from
    22 dim mi$(20):rem menu items
-   23 dim r(32):dim g(32): dim b(32): rem palette values
+   23 dim c(20):rem menu item can be combined with nr of objects
+   24 dim r(32):dim g(32): dim b(32): rem palette values
    30 dim n(256):rem north
    31 dim e(256):rem east
    32 dim s(256):rem south
@@ -44,7 +45,7 @@
   122 gosub 4860: gosub 4840: rem set gfx screen and put it to buffer
   124 gosub 4830: rem set upper half back to txt
   199 rem ---- main loop ----
-  200 vsync100: border 11
+  200 vsync100: border 0
   205 gosub 8510: rem status bar
   210 if cr<>pr then begin :rem if new room then print description.
   211 if gr(pr)>0 and g=1 and gr(cr)=0 then gosub 4830: g=0
@@ -105,7 +106,7 @@
  1013 gosub 6000: rem print menu items
  1014 nextm
  1020 getkey a$
- 1025 if a$="_" then 1055: rem back arrow - only restore lower half
+ 1025 if a$=chr$(157) then 1055: rem back arrow - only restore lower half
  1030 if a$=chr$(17) and v<nv then v=v+1
  1040 if a$=chr$(145) and v>1 then v=v-1
  1050 goto 1005
@@ -157,7 +158,7 @@
  5060 poke $d05e, 40: rem set chrcnt
  5070 rem ==========================
  5080 for i=0tols*25   step2 :wpoke$50000+i,$0020:nexti:rem fill the whole screen
- 5090 for i=0tols*25*2 step2 :wpoke$ff80000+i,$0300:nexti:rem fill colour ram
+ 5090 for i=0tols*25*2 step2 :wpoke$ff80000+i,$0100:nexti:rem fill colour ram
  5225 return
  5230 getkey a$
  5240 rem ===== reset settings =====
@@ -197,9 +198,10 @@
  7130 wpoke sp+x1*2+ls*(y1+i),93
  7135 wpoke sp+x2*2+ls*(y1+i),93
  7140 nexti
+ 7145 for i=x1+1tox2-1:wpoke $ff80000+ls*18+2*i,$0200:nexti:rem highlight
  7190 return
  8099 rem --- load verbs ---
- 8100 border 13
+ 8100 border 0
  8110 as=($50000):ad=($50000)
  8115 bload"verbs",p($50000)
  8117 nv=peek(as): rem cursor on,0,0,0:printm:getkey o$
@@ -212,7 +214,7 @@
  8145 goto 8125
  8150 ad=ad+1:c(i)=peek(ad):ad=ad+1
  8180 next i
- 8190 border 11:return
+ 8190 border 0 :return
  8199 rem --- load room attributes ---
  8200 bload "rooms-attr",p($40000)
  8205 for c=0to240
@@ -253,7 +255,13 @@
  8504 if g=1 and gr(cr)>0 then gosub 4820
  8508 return
  8509 rem ----print status bar----
- 8510 for i=0to39:wpoke sp+i*2,i:nexti
+ 8510 for i=0to39:wpoke sp+i*2,32   :nexti
+ 8512 if n(cr)>0 then wpoke sp+16*2,78
+ 8514 if e(cr)>0 then wpoke sp+17*2,69
+ 8516 if s(cr)>0 then wpoke sp+18*2,83
+ 8518 if w(cr)>0 then wpoke sp+19*2,87
+ 8520 if u(cr)>0 then wpoke sp+21*2,85
+ 8522 if d(cr)>0 then wpoke sp+22*2,68
  8598 return
  8599 rem ----load objects----
  8600 c=0
