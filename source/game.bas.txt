@@ -1,8 +1,8 @@
     0 :rem test normal char
     9 rem screen buffers from $8000000-$8002280
    10 rem --- variables, arrays ---
-   11 rem v: menu verb nr ---
-   12 rem nv:number of verbs in the list
+   11 rem va,vb,vc -menu verb ,1st obj, 2nd obj
+   12 rem nv,na:number of verbs in the list, number of available objects
    13 cr=1:pr=0: g=1::rem current room and previous room / gfx on or off
    14 ro=0: io=0: rem nr.of objs in current room/inventory
    15 background 0: border 0: pa=$8100000: rem pictures address
@@ -26,9 +26,10 @@
    40 dim ol(120) :rem object location
    41 dim ob(120) :rem object name pointer
    42 dim od(120) :rem object description pointer
-   43 dim o(120): rem objects in current room
-   44 dim l(120): rem objects in inventory
-   45 dim mp(240) :rem message pointer
+   43 dim oa(120) :rem object available for menu
+   44 dim o(120): rem objects in current room
+   45 dim ol$(120): rem objects in inventory and current room
+   46 dim mp(240) :rem message pointer
    90 mem 1,3: screen clr
    94 gosub 8600 :rem load objects
    95 gosub 8100 :rem load verbs
@@ -39,7 +40,7 @@
   105 rem bload"fcmchrs.chr",p($4xxxx)
   110 print chr$(14): rem lower case
   111 for i=0to999:wpoke sp+i*2,32:nexti:rem clear screen mem
-  113 gosub 6000 :rem print menu item
+  113 rem gosub 6000 :rem print menu item
   115 gosub 5000: rem setup fcm-rrb environment
   120 gosub 4820:rem upper half to buffer
   122 gosub 4860: gosub 4840: rem set gfx screen and put it to buffer
@@ -96,41 +97,98 @@
   874 gosub 5250: rem reset settings
   875 palette restore
   900 end
-  999 rem ------menu------
- 1000 v=1
+  999 rem ---- menu l1 -uses mi$() menu item array---
+ 1000 va=1
  1001 gosub 4800
  1004 x1=1:y1=14:x2=12:y2=23:gosub 7100 :rem draw menu box
  1005 for m=1to7
  1010 my=14+m:mx=2:ml=10
- 1011 if(v-4+m)<1 or (v-4+m)>nv then m$="":else m$=mi$(v-4+m)
+ 1011 if(va-4+m)<1 or (va-4+m)>nv then m$="":else m$=mi$(va-4+m)
  1013 gosub 6000: rem print menu items
  1014 nextm
  1020 getkey a$
- 1025 if a$=chr$(157) then 1055: rem back arrow - only restore lower half
- 1030 if a$=chr$(17) and v<nv then v=v+1
- 1040 if a$=chr$(145) and v>1 then v=v-1
+ 1025 if a$=chr$(157) then va=0:goto 1055: rem left arrow - only restore lower half
+ 1030 if a$=chr$(17) and va<nv then va=va+1
+ 1040 if a$=chr$(145) and va>1 then va=va-1
+ 1045 if a$=chr$(13) and c(va)>0 then 1060:rem menu level2
+ 1046 if a$=chr$(13) and c(va)=0 then vb=0:vc=0: goto 1055
  1050 goto 1005
  1055 gosub 4810: rem restore lower half
  1057 return
- 1480 rem --- command selected path ---
- 1485 if g=1 and gr(cr)>0 then gosub 4830: rem restore text before command evaluation
- 1490 return
+ 1059 rem --- menu level2 -returns oa(vb) for selected object ---
+ 1060 vb=1
+ 1061 gosub 4803: rem lower half to buffer2
+ 1062 x1=14:y1=14:x2=25:y2=23:gosub 7100 :rem draw menu box
+ 1063 gosub 8800: rem check available objects
+ 1065 for n=1to7
+ 1070 my=14+n:mx=28:ml=10
+ 1071 if(vb-4+n)<1 or (vb-4+n)>na then m$="":else m$=ol$(vb-4+n)
+ 1072 for i=1toml
+ 1073  if i>len(m$) then c=32:else c=asc(mid$(m$,i,1))
+ 1074  wpoke sp+mx+i*2+my*ls,$0000+c:nexti
+ 1075 nextn
+ 1076 getkey a$
+ 1077 if a$=chr$(157) then vb=0:gosub 4814:goto1005: rem left arrow - back one level
+ 1079 if a$=chr$(13) and c(va)>1 then 1100:rem menu level3
+ 1080 if a$=chr$(13) and c(va)=1 then 1055
+ 1082 if a$=chr$(17) and vb<na then vb=vb+1
+ 1083 if a$=chr$(145) and vb>1 then vb=vb-1
+ 1085 goto 1065
+ 1097 gosub 4810:rem restore from buffer 1
+ 1098 return
+ 1099 rem --- menu level 3 -returns oa(vc) for selected object ---
+ 1100 vc=1
+ 1102 gosub 4824: rem lower half to buffer3
+ 1104 x1=27:y1=14:x2=38:y2=23:gosub 7100 :rem draw menu box
+ 1106 for k=1to7
+ 1108 my=14+k:mx=54:ml=10
+ 1110 if(vc-4+k)<1 or (vc-4+k)>na then m$="":else m$=ol$(vc-4+k)
+ 1112 for i=1toml
+ 1114  if i>len(m$) then c=32:else c=asc(mid$(m$,i,1))
+ 1116  wpoke sp+mx+i*2+my*ls,$0000+c:nexti
+ 1118 nextk
+ 1126 getkey a$
+ 1128 if a$=chr$(157) then vc=0:gosub 4833:goto1065: rem left arrow - back one level
+ 1130 if a$=chr$(13) then 1055
+ 1132 if a$=chr$(17) and vc<na then vc=vc+1
+ 1134 if a$=chr$(145) and vc>1 then vc=vc-1
+ 1136 goto 1106
+ 1200 return
+ 3000 rem --- command selected path ---
+ 3005 if g=1 and gr(cr)>0 then gosub 4830: rem restore text before command evaluation
+ 3010 return
  4799 rem ---lower half to buffer---
  4800 edma 0,800,(sp+14*ls),$8000000
  4801 edma 0,800,($ff80000+14*ls),$8000320
  4802 return
- 4809 rem ---buffer to lower half---
+ 4803 rem ---lower half2 to buffer2---
+ 4804 edma 0,800,(sp+14*ls),$80028b0
+ 4805 edma 0,800,($ff80000+14*ls),$80030b0
+ 4806 return
+ 4809 rem ---buffer1 to lower half---
  4810 edma 0,800,$8000000,(sp+14*ls)
  4811 edma 0,800,$8000320,($ff80000+14*ls)
  4812 return
+ 4813 rem ---buffer2 to lower half---
+ 4814 edma 0,800,$80028b0,(sp+14*ls)
+ 4815 edma 0,800,$80030b0,($ff80000+14*ls)
+ 4816 return
  4819 rem ---upper half to buffer (rows 1-13, skip row 0)---
  4820 edma 0,1040,sp+ls,$8000640
  4821 edma 0,1040,$ff80000+ls,$8001050
  4822 return
+ 4823 rem ---lower half3 to buffer3---
+ 4824 edma 0,800,(sp+14*ls),$8002bd0
+ 4825 edma 0,800,($ff80000+14*ls),$80033d0
+ 4826 return
  4829 rem ---buffer to upper half (rows 1-13, skip row 0)---
  4830 edma 0,1040,$8000640,sp+ls
  4831 edma 0,1040,$8001050,$ff80000+ls
  4832 return
+ 4833 rem ---buffer3 to lower half---
+ 4834 edma 0,800,$8002bd0,(sp+14*ls)
+ 4835 edma 0,800,$80033d0,($ff80000+14*ls)
+ 4836 return
  4839 rem ---gfx to buffer---
  4840 edma 0,1040,sp+ls,$8001460
  4841 edma 0,1040,$ff80000+ls,$8001870
@@ -284,6 +342,20 @@
  8712 if cr=ol(i) then o(a)=ob(i):a=a+1
  8714 next i
  8720 return
+ 8799 rem ---available objects--oa, ol$
+ 8800 na=0
+ 8805 for i=1to119
+ 8806 ol$(i)=""
+ 8807  if ol(i)=0 or ol(i)=cr then na=na+1:oa(na)=i
+ 8810 next i
+ 8812 if na=0 then 8998
+ 8813 for i=1tona
+ 8814 z=0
+ 8822  c$=chr$(peek(da+$ef10+ob(oa(i))+z))
+ 8824  if asc(c$)=94 then 8830
+ 8826  ol$(i)=ol$(i)+c$:z=z+1:goto 8822
+ 8830 next i
+ 8998 return
  8999 rem ========================
  9000 for i=0to255
  9010 poke 3000+i,peek($4ef10+i):nexti
