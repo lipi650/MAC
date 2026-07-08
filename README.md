@@ -4,6 +4,16 @@ You can create a menu-driven text adventure with it and add colour graphics too.
 It will use NCM (Nibble colour mode) to keep the size small but I might release an FCM (Fullcolor Character Mode) version later if there's demand for it.
 The program is still under development.
 
+## The UI:
+The upper status bar shows the available directions.
+The player can navigate with the cursor arrows and U(up) D(down) keys.
+RETURN opens the 3-level menu:
+* 1st level is the available commands (Look, Examine, Use, etc...)
+* 2nd level opens if the selected command can use an object
+* 3rd level opens if the selected command uses 2 objects
+The player can navigate up and down in the menu with the cursor arrows and go back one level with left arrow.
+RETURN confirms the selected menu item.
+
 ## Importing the GFX:
 Create a 320x200 IFF image.
 The first row should hold the palette (1 pixel of each color from left to right)
