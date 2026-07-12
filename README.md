@@ -22,3 +22,11 @@ At the current state the tool only imports 24 images from 01PICS.D81 and saves t
 Later I can improve it to import more and save to separate game disks if the size requires it.
 Every picture can have different palette.
 The plan is that the main program will use the first colour as background, the second color as text and the third color as menu highlight so you should make the palette order according to this when defining the colors in the first pixel row.
+
+## Verbs
+You can set up 20 verbs.
+The function of the first three verbs are hardcoded:
+1. Look: (prints the actual room's description)
+2. Inventory
+3. Get object
+The other verbs can be freely configured with global/local rules.
