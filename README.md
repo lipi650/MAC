@@ -23,6 +23,8 @@ Later I can improve it to import more and save to separate game disks if the siz
 Every picture can have different palette.
 The plan is that the main program will use the first colour as background, the second color as text and the third color as menu highlight so you should make the palette order according to this when defining the colors in the first pixel row.
 
+The naming convention is 01.IFF ... 24.IFF
+
 ## Verbs
 You can set up 20 verbs.
 The function of the first three verbs are hardcoded:
