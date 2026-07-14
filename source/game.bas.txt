@@ -417,5 +417,24 @@
 10039 pr=cr
 10041 if ro=0 then ad=da+$ef10:gosub 8300
 10049 bend
-10050 rem ---
+10050 rem ---get object---
+10051 if ru(8)>0 then begin
+10052 if ol(oa(vb))=0 then gosub 4830:gosub 8500:ad=da+$13f40+mp(9): gosub 8300
+10053 if ol(oa(vb))=cr then begin
+10054  gosub 4830:gosub 8500:ad=da+$13f40+mp(8): gosub 8300
+10055  ol(oa(vb))=0
+10056 bend
+10059 bend
+10060 rem ---move obj1 to room---
+10062 if ru(10)>0 then ol(vb)=ru(10)
+10064 rem ---drop object
+10066 if ru(9)>0 then begin
+10068 if ol(oa(vb))=cr then gosub 4830:gosub 8500:ad=da+$13f40+mp(11): gosub 8300
+10069 if ol(oa(vb))=0 then begin
+10070  gosub 4830:gosub 8500:ad=da+$13f40+mp(10): gosub 8300
+10071  ol(oa(vb))=cr
+10072 bend
+10073 bend
+10075 rem ---move object to current room
+10076 if ru(11)>0 then ol(ru(11))=cr
 11100 return
