@@ -10,12 +10,13 @@
    21 dim od(121): rem object description pointer
    24 dim ol(121):rem object name location
    25 le=0:rem length of the input string for description/object name
+   26 for i=0to120:ol(i)=255:nexti
    32 c=1:b=0:rem c=current room, b=asc to byte conversion
    34 x=0: y=12: rem cursor position for entering room description.
    36 d$="": rem temporary string for description input
    38 v$="": rem temporary string for direction values
    40 le=80: for i=1to120:poke ts+((i-1)*le),94:nexti:rem add an end~ in each desc.
-   42 le=16: ts=$54b00:for i=1to120:poke ts+((i-1)*le ),94:nexti:rem add an end~ in each desc.
+   42 le=11: ts=$54b00:for i=1to120:poke ts+((i-1)*le ),94:nexti:rem add an end~ in each desc.
  1000 scnclr
  1001 print"{lgrn}q{wht}uit, {lgrn}+{wht}/{lgrn}-{wht}:object nr, {lgrn}ret.{wht}: obj. desc. {lgrn}l{wht}ocation (0 is inventory)"
  1003 cursor 2,2:print"obj. nr. : ";c
@@ -30,7 +31,7 @@
  1114 if a$="q" then 4000
  1116 if a$=chr$(13) then ts=$50000: le=80: so=960: gosub 5000 :rem gosub input desc.
  1120 if a$="l" then cursor13,4 :gosub 5400:ol(c)=val(v$)
- 1122 if a$="o" then ts=$54b00: le=16: so=251: gosub 5000 :rem input object name
+ 1122 if a$="o" then ts=$54b00: le=11: so=251: gosub 5000 :rem input object name
  1130 if asc(a$)=133 then gosub 5800
  1132 if asc(a$)=134 then gosub 5500
  3900 goto 1000
@@ -61,7 +62,7 @@
  5320  poke sa+so +n,b
  5325 n=n+1:goto 5310
  5327 rem ----print object name----
- 5330 le=16:n=0:ts=$54b00:so=251
+ 5330 le=11:n=0:ts=$54b00:so=251
  5335 b=peek(ts+c*le+n)
  5336  if b=94 then return
  5340  poke sa+so +n,b
@@ -69,7 +70,7 @@
  5399 rem ----input number for location----
  5400 n=0: v$=""
  5405 input v$
- 5410 if val(v$)>239 then v$=""
+ 5410 if val(v$)>255 then v$=""
  5412 if val(v$)<0 then v$=""
  5415 v=val(v$):return
  5499 rem ----save to files----
@@ -81,7 +82,7 @@
  5518 loop while c<120
  5519 bsave"@obj-desc",p ($40000) to p($40000+n)
  5520 rem -----------
- 5525 ts=$54b00:n=0:i=0:c=0:le=16
+ 5525 ts=$54b00:n=0:i=0:c=0:le=11
  5530 do
  5535  b=peek(ts+c*le +i):i=i+1
  5540  if b=94 then c=c+1:i=0:ob(c)=n+1
@@ -116,7 +117,7 @@
  5898 next c
  5899 c=0
  5905 bload"objects",p ($40000)
- 5910 c=0:n=0:i=0:ts=$54b00:le=16
+ 5910 c=0:n=0:i=0:ts=$54b00:le=11
  5920 do
  5930  b=peek($40000+n)
  5940  poke ts+c*le +i,b
