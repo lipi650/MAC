@@ -45,6 +45,7 @@ Rules after the first empty rule are not checked (for optimizing performance).<b
 When a rule has no Verb condition set then that rule is evaluated immediately after showing a room's description.<br>
 When a rule has a Verb condition set then it is evaluated after a command is selected from the menu system.<br>
 When a combination of conditions is met then several actions can be executed by the rule (piciking up / dropping an object, displaying a message / opening a path to a near room / setting a flag etc...)
+You should set an empty rule vith verb=1 for Look and an other one with verb=2 for Inventory.
 
 ## Support
 If you enjoy this project or create a game with it, you can buy me a coffee me on [Ko-fi](https://ko-fi.com/lipi650).

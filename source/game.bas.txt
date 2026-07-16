@@ -377,8 +377,8 @@
  9011  if(ru(0)<>0)and(ru(0)<>cr)then 9490
  9012  if(ru(4)<>0)and(fl(ru(4))<>1)then 9490
  9014  if(ru(5)<>0)and(fl(ru(5))<>0)then 9490
- 9016  if(ru(6)<>0)and(ol(ob(ru(6)))<>0)then 9490
- 9018  if(ru(7)<>0)and(ol(ob(ru(7)))=0)then 9490
+ 9016  if(ru(6)<>0)and(ol(ru(6))<>0)then 9490
+ 9018  if(ru(7)<>0)and(ol(ru(7))=0)then 9490
  9019 nc=1
  9020 gosub 10000
  9490 next nr
@@ -392,12 +392,12 @@
  9510 for i=0to22:ru(i)=peek(ra+nr*23+i):nexti
  9520  if(ru(0)<>0)and(ru(0)<>cr)then 9990
  9522  if(ru(1)<>0)and(ru(1)<>va)then 9990
- 9524  if(ru(2)<>0)and(ru(2)<>vb)then 9990
- 9526  if(ru(3)<>0)and(ru(3)<>vc)then 9990
+ 9524  if(ru(2)<>0)and(ru(2)<>oa(vb))then 9990
+ 9526  if(ru(3)<>0)and(ru(3)<>oa(vc))then 9990
  9528  if(ru(4)<>0)and(fl(ru(4))<>1)then 9990
  9530  if(ru(5)<>0)and(fl(ru(5))<>0)then 9990
- 9532  if(ru(6)<>0)and(ol(ob(ru(6)))<>0)then 9990
- 9534  if(ru(7)<>0)and(ol(ob(ru(7)))=0)then 9990
+ 9532  if(ru(6)<>0)and(ol(ru(6))<>0)then 9990
+ 9534  if(ru(7)<>0)and(ol(ru(7))=0)then 9990
  9536 nc=0
  9550  gosub 10000
  9990 next nr
