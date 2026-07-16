@@ -15,7 +15,7 @@ The player can navigate up and down in the menu with the cursor arrows and go ba
 RETURN confirms the selected menu item.
 
 ## Importing the GFX (IFF2NCM.BAS):
-Create a 320x200 IFF image.
+Create a 320x200 IFF image with any 16 colours (4 bitplanes).
 The first row should hold the palette (1 pixel of each color from left to right)
 The next 104 rows will be converted to 16x8 pixel sized NCM (Nibble Colour Mode) characters.
 At the current state the tool only imports 24 images from 01PICS.D81 and saves the converted information in NCM format to the MAC.D81 disk.
