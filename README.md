@@ -31,6 +31,7 @@ The function of the first three verbs are hardcoded:
 1. Look: (prints the actual room's description)
 2. Inventory
 3. Get object
+4. Examine (prints object descriptions)
 
 The other verbs can be freely configured with global/local rules.
 
