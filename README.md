@@ -2,7 +2,7 @@
 Mega Adventure Creator is a Graphical Text Adventure creator for the Mega65.
 You can create a menu-driven text adventure with it and add colour graphics too.
 It will use NCM (Nibble colour mode) to keep the size small but I might release an FCM (Fullcolor Character Mode) version later if there's demand for it.
-The program is still under development.
+The program is at useable state but there is still room for improvements (like adding weight to objects / UI improvements).
 
 ## The UI:
 The upper status bar shows the available directions.
