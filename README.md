@@ -4,8 +4,6 @@ You can create a menu-driven text adventure with it and add colour graphics too.
 It will use NCM (Nibble colour mode) to keep the size small but I might release an FCM (Fullcolor Character Mode) version later if there's demand for it.
 The program is still under development.
 
-If you enjoy this project or create a game with it, you can support me on [Ko-fi](https://ko-fi.com/lipi650).
-
 ## The UI:
 The upper status bar shows the available directions.
 The player can navigate with the cursor arrows and U(up) D(down) keys.
@@ -47,3 +45,5 @@ When a rule has no Verb condition set then that rule is evaluated immediately af
 When a rule has a Verb condition set then it is evaluated after a command is selected from the menu system.<br>
 When a combination of conditions is met then several actions can be executed by the rule (piciking up / dropping an object, displaying a message / opening a path to a near room / setting a flag etc...)
 
+## Support
+If you enjoy this project or create a game with it, you can buy me a coffee me on [Ko-fi](https://ko-fi.com/lipi650).
