@@ -16,12 +16,12 @@ RETURN confirms the selected menu item.
 
 ## Importing the GFX (IFF2NCM.BAS):
 Create a 320x200 IFF image with any 16 colours (4 bitplanes).
-The first row should hold the palette (1 pixel of each color from left to right)
+The first row should hold the palette (1 pixel of each colour from left to right)
 The next 104 rows will be converted to 16x8 pixel sized NCM (Nibble Colour Mode) characters.
 At the current state the tool only imports 24 images from 01PICS.D81 and saves the converted information in NCM format to the MAC.D81 disk.
 Later I can improve it to import more and save to separate game disks if the size requires it.
 Every picture can have different palette.
-The plan is that the main program will use the first colour as background, the second color as text and the third color as menu highlight so you should make the palette order according to this when defining the colors in the first pixel row.
+The plan is that the main program will use the first colour as background, the second colour as text and the third colour as menu highlight so you should make the palette order according to this when defining the colours in the first pixel row.
 
 The naming convention is 01.IFF ... 24.IFF
 

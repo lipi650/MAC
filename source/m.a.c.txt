@@ -10,6 +10,9 @@
   120 rem  cursor 25,10:print"6. local rules"
   128 cursor 25,15:print"g. test the game"
   130 cursor 25,16:print"q. quit"
+  140 cursor 22,22:print"written by gabor lipcsei in 2026"
+  142 cursor  1,24:print"https://github.com/lipi650/mac";
+  143 cursor  54,24:print"https://ko-fi.com/lipi650";
   300 getkey a$
   310 if a$="1" then run"verb-edit.bas"
   312 if a$="2" then run"room-edit.bas"

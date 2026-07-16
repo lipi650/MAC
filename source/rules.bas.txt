@@ -1,0 +1,115 @@
+   10 rem global rules editor
+   12 border 12: background 11 :key off
+   15 scnclr :printchr$(27)+"5"
+   17 ad=$8300000
+   20 dim gr(23)
+   22 nr=0
+   25 for i=0to255
+   26 edma 3,22*255,0,ad
+   27 nexti
+   80 cursor 1,1:print"{grn}+{wht}/{grn}-{wht}:rule nr.:";nr,"{lgrn}_{wht}:quit","{lgrn}f1{wht}/{lgrn}f3{wht}:load/save"
+   85 cursor 1,2:print"rules lines with 0 values are skipped."
+  100 cursor 1,3:print"q. if room=",,,gr(0)
+  102 cursor 1,4:print"w.    verb=",,,gr(1)
+  105 cursor 1,5:print"e.    obj1=",,,gr(2)
+  110 cursor 1,6:print"r.    obj2=",,,gr(3)
+  115 cursor 1,7:print"t.    flag{lgrn}";gr(4);"{wht}is on"
+  116 cursor 1,8:print"y.    flag{lgrn}";gr(5);"{wht}is off"
+  117 cursor 1,9:print"u.    object{lgrn}";gr(6);"{wht}is in inventory"
+  118 cursor 1,10:print"i.    object{lgrn}";gr(7);"{wht}is not in inventory"
+  150 cursor 1,13:print"then"
+  155 rem cursor 1,15:print"a. get object 1";gr(7)
+  160 cursor 1,15:print"a. get object 1";gr(8)
+  162 cursor 1,16:print"s. drop object 1";gr(9)
+  165 cursor 1,17:print"d. move object 1 to room...";gr(10)
+  166 cursor 1,18:print"f. move object";gr(11);"to current room"
+  170 cursor 1,19:print"g. open room to north:";gr(12)
+  175 cursor 1,20:print"h. open room to east:";gr(13)
+  180 cursor 1,21:print"j. open room to south:";gr(14)
+  185 cursor 1,22:print"k. open room to west:";gr(15)
+  190 cursor 1,23:print"l. open room to up:";gr(16)
+  195 cursor 1,24:print"z. open room to down:";gr(17)
+  200 cursor 1,25:print"x. print message:";gr(18)
+  205 cursor 1,26:print"c. set flag:";gr(19)
+  210 cursor 1,27:print"v. clear flag:";gr(20)
+  215 cursor 1,28:print"b. game over:";gr(21)
+  220 cursor 1,29:print"n. game won:";gr(22)
+  299 rem ----------------------------
+  300 getkey a$
+  305 if a$="_" then 998
+  307 if a$="e" then gosub 1100:gr(2)=val(n$)
+  308 if a$="q" then gosub 1150:gr(0)=val(n$)
+  309 if a$="w" then gosub 1050:gr(1)=val(n$)
+  310 if a$="r" then gosub 1100:gr(3)=val(n$)
+  312 if a$="t" then gosub 1000:gr(4)=val(n$)
+  314 if a$="y" then gosub 1000:gr(5)=val(n$)
+  316 if a$="u" then gosub 1100:gr(6)=val(n$)
+  318 if a$="+" and nr<255 then gosub 1500:nr=nr+1:gosub 1600
+  319 if a$="i" then gosub 1100:gr(7)=val(n$)
+  320 if a$="-" and nr>0 then gosub 1500:nr=nr-1:gosub 1600
+  322 if a$="s" and gr(9)=0 then gr(9)=1: goto 990
+  323 if a$="s" and gr(9)=1 then gr(9)=0: goto 990
+  324 if a$="a" and gr(8)=0 then gr(8)=1: goto 990
+  325 if a$="a" and gr(8)=1 then gr(8)=0: goto 990
+  326 if a$="d" then gosub 1150:gr(10)=val(n$)
+  328 if a$="f" then gosub 1100:gr(11)=val(n$)
+  330 if a$="g" then gosub 1150:gr(12)=val(n$)
+  332 if a$="h" then gosub 1150:gr(13)=val(n$)
+  334 if a$="j" then gosub 1150:gr(14)=val(n$)
+  336 if a$="k" then gosub 1150:gr(15)=val(n$)
+  338 if a$="l" then gosub 1150:gr(16)=val(n$)
+  340 if a$="z" then gosub 1150:gr(17)=val(n$)
+  342 if a$="x" then gosub 1150:gr(18)=val(n$)
+  344 if a$="c" then gosub 1100:gr(19)=val(n$)
+  345 if a$="v" then gosub 1100:gr(20)=val(n$)
+  350 if a$="b" and gr(21)=0 then gr(21)=1:goto 990
+  351 if a$="b" and gr(21)=1 then gr(21)=0:goto 990
+  355 if a$="n" and gr(22)=0 then gr(22)=1:goto 990
+  356 if a$="n" and gr(22)=1 then gr(22)=0:goto 990
+  360 if a$=chr$(133) then gosub 1800
+  362 if a$=chr$(134) then gosub 1700
+  990 scnclr:goto 80
+  998 printchr$(27)+"8":end
+  999 rem ----input 3-digit nr----
+ 1000 cursor 1,30:input"?";n$
+ 1010 if val(n$)<0 then 1000
+ 1020 if val(n$)>255 then 1000
+ 1030 return
+ 1045 rem ----input number (max20)----
+ 1050 cursor 1,30:input"?";n$
+ 1055 if val(n$)<0 then 1050
+ 1060 if val(n$)>20 then 1050
+ 1065 return
+ 1070 rem ----input number (max119)----
+ 1100 cursor 1,30:input"?";n$
+ 1110 if val(n$)<0 then 1100
+ 1120 if val(n$)>119 then 1100
+ 1130 return
+ 1140 rem ----input number (max240)----
+ 1150 cursor 1,30:input"?";n$
+ 1160 if val(n$)<0 then 1150
+ 1170 if val(n$)>250 then 1150
+ 1180 return
+ 1499 rem ---store rule to attic ram---
+ 1500 for i=0to22
+ 1510  edma 3,1,gr(i),ad+nr*23+i
+ 1580 next i
+ 1590 return
+ 1599 rem ---restore rule from attic ram---
+ 1600 for i=0to22
+ 1610  edma 0,1,ad+nr*23+i,$40000
+ 1620 gr(i)=peek($40000)
+ 1680 next i
+ 1690 return
+ 1699 rem ---save rules---
+ 1700 border 8
+ 1705 gosub 1500
+ 1710 bsave "@rules",p(ad)to p(ad+255*23)
+ 1715 sleep1: border 12
+ 1790 return
+ 1799 rem ---load rules---
+ 1800 border 5
+ 1810 bload"rules",p(ad)
+ 1815 gosub 1600
+ 1820 sleep1: border 12
+ 1890 return
