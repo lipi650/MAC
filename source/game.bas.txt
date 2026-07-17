@@ -75,7 +75,7 @@
   236  if ge=1 and a$="y" then 85
   238  if ge=1 and a$="n" then 874
   240 if ge=1 then goto 235
-  260 rem gosub to print v1 v2 v3 then scroll up 1 line
+  260 rem gosub 10200: rem print commands
   290 if g=1 and gr(cr)>0 then begin
   292 edma 0,16640,pa+(gr(cr)-1)*(48+16640)+48,$41000
   293 gosub 4850: rem restore gfx to screen
@@ -121,8 +121,8 @@
  1030 if a$=chr$(17) and va<nv then va=va+1
  1040 if a$=chr$(145) and va>1 then va=va-1
  1045 if a$=chr$(13) and c(va)>0 then 1060:rem menu level2
- 1046 if a$=chr$(13) and c(va)=0 and va<>1 then vb=0:vc=0:gosub 4810:gosub 9500:goto 1057
- 1047 if a$=chr$(13) and c(va)=0 and va=1 then vb=0:vc=0:gosub 4810:gosub 9500:gosub 9000:goto 1057
+ 1046 if a$=chr$(13) and c(va)=0 and va<>1 then vb=0:vc=0:gosub 4810:gosub 10200:gosub 9500:goto 1057
+ 1047 if a$=chr$(13) and c(va)=0 and va=1 then vb=0:vc=0:gosub 4810:gosub 10200:gosub 9500:gosub 9000:goto 1057
  1050 goto 1005
  1055 gosub 4810: rem restore lower half
  1057 return
@@ -141,7 +141,7 @@
  1076 getkey a$
  1077 if a$=chr$(157) then vb=0:gosub 4814:goto1005: rem left arrow - back one level
  1079 if a$=chr$(13) and c(va)>1 then 1100:rem menu level3
- 1080 if a$=chr$(13) and c(va)=1 then gosub 4810:gosub 9500:goto 1057
+ 1080 if a$=chr$(13) and c(va)=1 then gosub 4810:gosub 10200:gosub 9500:goto 1057
  1082 if a$=chr$(17) and vb<na then vb=vb+1
  1083 if a$=chr$(145) and vb>1 then vb=vb-1
  1085 goto 1065
@@ -160,7 +160,7 @@
  1118 nextk
  1126 getkey a$
  1128 if a$=chr$(157) then vc=0:gosub 4833:goto1065: rem left arrow - back one level
- 1130 if a$=chr$(13) then gosub 4810: gosub 9500: goto 1057
+ 1130 if a$=chr$(13) then gosub 4810: gosub 10200:gosub 9500: goto 1057
  1132 if a$=chr$(17) and vc<na then vc=vc+1
  1134 if a$=chr$(145) and vc>1 then vc=vc-1
  1136 goto 1106
@@ -481,4 +481,26 @@
 10118 if ru(21)>0 then cr=ru(21)
 10120 rem ---game end---
 10122 if ru(22)>0 then ge=1
-11100 return
+10198 return
+10199 rem ---print command---
+10200 if va=0 then 10498
+10201 gosub 4830:wpoke sp+1920,62
+10202 for i=1tolen(mi$(va)): c=asc(mid$(mi$(va),i,1))
+10203 if c>64  then c=c-64
+10204 if c>128 then c=c-64
+10205 wpoke sp+(960+i)*2,c:nexti
+10206 if vb>0 then begin
+10207  p=0
+10208  c= peek(da+$ef10+ob(oa(vb))+p)
+10209  if c<>94then poke sp+4+(p+24*40+len(mi$(va)))*2,peek(da+$ef10+ob(oa(vb))+p)
+10221  if c=94 then 10223
+10222  if c<>94 then p=p+1:goto 10208
+10223 bend
+10225 if vc>0 then begin
+10226 pb=0
+10228  if peek(da+$ef10+ob(oa(vc))+pb)<>94then poke sp+6+(p+24*40+len(mi$(va)))*2,peek(da+$ef10+ob(oa(vc))+pb)
+10229  if peek(da+$ef10+ob(oa(vc))+pb)=94 then 10231
+10230  if peek(da+$ef10+ob(oa(vc))+pb)<>94 then p=p+1:pb=pb+1:goto 10228
+10231 bend
+10405 gosub 8500
+10498 return
