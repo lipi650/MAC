@@ -260,7 +260,9 @@
  7100 le=x2-x1: rem length of menu box
  7105 he=y2-y1: rem height of menu box
  7110 for i=1tole-1
+ 7114 wpoke sp+x1*2+y1*ls,112:wpoke sp+x2*2+(y2-1)*ls,125
  7115 wpoke sp+x1*2+i*2+y1*ls,64
+ 7116 wpoke sp+x1*2+(y2-1)*ls,109:wpoke sp+x2*2+y1*ls,110
  7117 wpoke sp+x1*2+i*2+(y2-1)*ls,64
  7120 nexti
  7125 for i=1tohe-2
