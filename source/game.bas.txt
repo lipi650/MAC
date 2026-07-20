@@ -70,7 +70,7 @@
   224 gosub 9000
   225 pr=cr
   226 bend
-  230 if ge=1 then gosub 4830:gosub 8500:ad=da+$13f40+mp(12): gosub 8300
+  230 if ge=1 then gosub 4830:ad=da+$13f40+mp(12): gosub 8300:gosub 8500
   235  if ge=1 then getkey a$
   236  if ge=1 and a$="y" then 85
   238  if ge=1 and a$="n" then 874
@@ -386,7 +386,7 @@
  9490 next nr
  9498 return
  9499 rem ---rules checked after commands issued---
- 9500 for nr=0to255
+ 9500 r=0:for nr=0to255
  9502 s=0
  9505 if peek(ra+nr*23+1)=0 then 9990 :rem not command related rule
  9507 for i=0to8:s=s+peek(ra+nr*23+i):nexti
@@ -400,14 +400,15 @@
  9530  if(ru(5)<>0)and(fl(ru(5))<>0)then 9990
  9532  if(ru(6)<>0)and(ol(ru(6))<>0)then 9990
  9534  if(ru(7)<>0)and(ol(ru(7))=0)then 9990
- 9536 nc=0
+ 9536 nc=0: r=r+1
  9550  gosub 10000
  9990 next nr
+ 9992 if r=0 then gosub 4830:ad=da+$13f40+mp(14):gosub 8300:gosub 8500
  9998 return
  9999 rem ---execute rule result---
 10000 if va=1 and nc=0 then begin: rem look
 10001 gosub 4830
-10002 gosub 8500:ad=da+dp(cr):gosub 8300:rem room desc
+10002 ad=da+dp(cr):gosub 8300:gosub 8500:rem room desc
 10004 gosub 8500:gosub 8700
 10005 if ro>0 then begin
 10006  ad=da+$13f40+mp(1):gosub 8300: rem print objects in room
@@ -439,9 +440,9 @@
 10049 bend
 10050 rem ---get object---
 10051 if ru(8)>0 then begin
-10052 if ol(oa(vb))=0 then gosub 4830:gosub 8500:ad=da+$13f40+mp(9): gosub 8300
+10052 if ol(oa(vb))=0 then gosub 4830:ad=da+$13f40+mp(9): gosub 8300:gosub 8500
 10053 if ol(oa(vb))=cr then begin
-10054  gosub 4830:gosub 8500:ad=da+$13f40+mp(8): gosub 8300
+10054  gosub 4830:ad=da+$13f40+mp(8): gosub 8300:gosub 8500
 10055  ol(oa(vb))=0
 10056 bend
 10059 bend
@@ -449,9 +450,9 @@
 10062 if ru(10)>0 then ol(vb)=ru(10)
 10064 rem ---drop object
 10066 if ru(9)>0 then begin
-10068 if ol(oa(vb))=cr then gosub 4830:gosub 8500:ad=da+$13f40+mp(11): gosub 8300
+10068 if ol(oa(vb))=cr then gosub 4830:ad=da+$13f40+mp(11): gosub 8300:gosub 8500
 10069 if ol(oa(vb))=0 then begin
-10070  gosub 4830:gosub 8500:ad=da+$13f40+mp(10): gosub 8300
+10070  gosub 4830:ad=da+$13f40+mp(10): gosub 8300:gosub 8500
 10071  ol(oa(vb))=cr
 10072 bend
 10073 bend
@@ -476,7 +477,7 @@
 10108 rem ---clear flag---
 10110 if ru(20)>0 then fl(ru(20))=0
 10112 rem ---examine---
-10114 if ru(1)=4 then gosub 4830:gosub 8500:ad=da+$f43f+od(oa(vb)):gosub 8300
+10114 if ru(1)=4 then gosub 4830:ad=da+$f43f+od(oa(vb)):gosub 8300:gosub 8500
 10116 rem ---goto room---
 10118 if ru(21)>0 then cr=ru(21)
 10120 rem ---game end---
