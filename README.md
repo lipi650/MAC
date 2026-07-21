@@ -36,7 +36,7 @@ The function of the first three verbs are hardcoded:
 The other verbs can be freely configured with global/local rules.
 
 ## Message editor
-Messages 0-11 are used for inventory and direction related texts.
+Messages 0-14 are used for inventory and direction and other fixed function texts.
 The other message slots can be used freely.
 
 ## Rule editor
