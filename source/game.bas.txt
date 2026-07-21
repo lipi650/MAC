@@ -31,7 +31,7 @@
    47 dim ru(23) :rem rules
    48 dim fl(256) :rem flags
    85 ge=0: rem game end
-   86 cr=1:pr=0: g=1::rem current room and previous room / gfx on or off
+   86 cr=1:pr=0: g=1:rem current room and previous room / gfx on or off
    87 ro=0: io=0: rem nr.of objs in current room/inventory
    88 for i=0to255:fl(i)=0:nexti
    90 mem 1,3: screen clr
@@ -71,10 +71,6 @@
   225 pr=cr
   226 bend
   230 if ge=1 then gosub 4830:ad=da+$13f40+mp(12): gosub 8300:gosub 8500
-  235  if ge=1 then getkey a$
-  236  if ge=1 and a$="y" then 85
-  238  if ge=1 and a$="n" then 874
-  240 if ge=1 then goto 235
   260 rem gosub 10200: rem print commands
   290 if g=1 and gr(cr)>0 then begin
   292 edma 0,16640,pa+(gr(cr)-1)*(48+16640)+48,$41000
@@ -85,7 +81,11 @@
   297 palette color i,r(i),g(i),b(i)
   298 nexti
   299 bend
-  303 getkey a$
+  300  if ge=1 then getkey a$
+  301  if ge=1 and a$="y" then 85
+  302  if ge=1 and a$="n" then 874
+  303 if ge=1 then goto 300
+  304 getkey a$
   305 if a$="q" then 874
   306 if a$=chr$(32) and gr(cr)>0 then g=1-g: rem toggle gfx on/off with space
   307 if a$=chr$(32) and gr(cr)>0 and g=0 then gosub 4830
@@ -211,7 +211,7 @@
  4859 rem ---set gfx screen (ncm from row 1)---
  4860 n=0
  4861 for s=0to12
- 4862 for i=0to19:wpoke $ff80000+i*2+(s+1)*ls,$0008: rem set ncm chars from row 1
+ 4862 for i=0to19:wpoke $ff80000+i*2+(s+1)*ls,$0f08: rem set ncm chars from row 1
  4863 wpoke$50000+i*2+(s+1)*ls,4160+n
  4864 n=n+1
  4866 next i
